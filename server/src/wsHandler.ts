@@ -186,6 +186,20 @@ function handleRoomJoin(ws: WebSocket, data: any): void {
   }
 
   const { room, playerId } = result;
+
+  // Close any old WebSocket for this player (reconnection mid-game)
+  const sockets = roomSockets.get(room.id);
+  if (sockets) {
+    for (const oldWs of sockets) {
+      const info = wsMap.get(oldWs);
+      if (info && info.playerId === playerId && oldWs !== ws) {
+        oldWs.close(1000, 'rejoin');
+        wsMap.delete(oldWs);
+        sockets.delete(oldWs);
+      }
+    }
+  }
+
   wsMap.set(ws, { roomId: room.id, playerId });
   joinWsRoom(ws, room.id);
 
@@ -197,7 +211,7 @@ function handleRoomJoin(ws: WebSocket, data: any): void {
     engine.state.players = room.players.map(p => ({ ...p, connected: true }));
     emitGameStates(room.id);
   }
-  console.log(`[room:join] ${room.id} by ${name}`);
+  console.log(`[room:join] ${room.id} by ${name} (playerId: ${playerId})`);
 }
 
 function handleRoomLeave(ws: WebSocket): void {
