@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-night text-white antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-good hover:bg-good-dark text-white font-semibold py-3 px-6 rounded-lg
+           transition-all duration-200 active:scale-95 min-h-[44px] min-w-[44px]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-danger {
+    @apply bg-evil hover:bg-evil-dark text-white font-semibold py-3 px-6 rounded-lg
+           transition-all duration-200 active:scale-95 min-h-[44px] min-w-[44px]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .btn-gold {
+    @apply bg-gold hover:bg-gold-dark text-night font-semibold py-3 px-6 rounded-lg
+           transition-all duration-200 active:scale-95 min-h-[44px] min-w-[44px]
+           disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100;
+  }
+
+  .card {
+    @apply bg-nightLight border border-slate-700 rounded-xl p-4;
+  }
+
+  .input-field {
+    @apply bg-nightLight border border-slate-600 rounded-lg px-4 py-3 text-white
+           placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-good
+           focus:border-transparent min-h-[44px] w-full;
+  }
+}
+
+/* Card flip animation */
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-card-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-front,
+.flip-card-back {
+  backface-visibility: hidden;
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Pulse animation for leader crown */
+@keyframes crown-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.crown-pulse {
+  animation: crown-pulse 2s ease-in-out infinite;
+}
+
+/* Vote flip stagger animation */
+@keyframes flip-in {
+  0% { transform: rotateX(90deg); opacity: 0; }
+  100% { transform: rotateX(0); opacity: 1; }
+}
+
+.vote-flip {
+  animation: flip-in 0.3s ease-out forwards;
+}
+
+/* Success/Fail burst */
+@keyframes burst-in {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.burst-in {
+  animation: burst-in 0.5s ease-out forwards;
+}
+
+/* Fade transition */
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "scripts": {
+    "dev:server": "cd server && npx tsx watch src/index.ts",
+    "build:server": "cd server && npx tsc",
+    "start": "cd server && node dist/server/src/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}
