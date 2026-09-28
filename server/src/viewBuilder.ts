@@ -10,6 +10,7 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
   // Base view - public info
   const view: PlayerView = {
     roomId: state.roomId,
+    roomName: state.roomName || '',
     phase: state.phase,
     players: state.players.map(p => ({ ...p })),
     myRole: myRole?.role || null,

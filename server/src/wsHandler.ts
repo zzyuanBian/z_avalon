@@ -146,17 +146,18 @@ function handleMessage(ws: WebSocket, msg: WsMessage): void {
 
 function handleRoomCreate(ws: WebSocket, data: any): void {
   const name = (data?.playerName || '').trim();
+  const roomName = (data?.roomName || '').trim();
   if (!name || name.length > 20) {
     send(ws, 'room:error', { message: '昵称需要1-20个字符' });
     return;
   }
 
-  const { room, playerId } = createRoom(name);
+  const { room, playerId } = createRoom(name, roomName);
   wsMap.set(ws, { roomId: room.id, playerId });
   joinWsRoom(ws, room.id);
 
   // Create engine immediately for lobby state
-  const engine = new GameEngine(room.id, room.players, room.hostId);
+  const engine = new GameEngine(room.id, room.players, room.hostId, room.name);
   engine.onGameOver = (state) => saveGameEnd(state);
   room.gameState = engine.state;
   engines.set(room.id, engine);
@@ -167,7 +168,7 @@ function handleRoomCreate(ws: WebSocket, data: any): void {
   const view = buildPlayerView(engine.state, playerId);
   send(ws, 'game:state', view);
 
-  console.log(`[room:create] ${room.id} by ${name}`);
+  console.log(`[room:create] ${room.id} (${room.name}) by ${name}`);
 }
 
 function handleRoomJoin(ws: WebSocket, data: any): void {

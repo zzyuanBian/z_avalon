@@ -6,9 +6,10 @@ export class GameEngine {
   state: GameState;
   onGameOver: ((state: GameState) => void) | null = null;
 
-  constructor(roomId: string, players: Player[], hostId: string) {
+  constructor(roomId: string, players: Player[], hostId: string, roomName: string = '') {
     this.state = {
       roomId,
+      roomName,
       phase: 'lobby',
       players: players.map(p => ({ ...p, connected: true })),
       roles: [],

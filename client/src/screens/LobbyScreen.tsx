@@ -26,6 +26,11 @@ export default function LobbyScreen() {
       {/* Room Code */}
       <RoomCode code={view.roomId} />
 
+      {/* Room name */}
+      {view.roomName && (
+        <p className="text-gold-light font-serif text-sm mb-2">{view.roomName}</p>
+      )}
+
       {/* QR Code toggle */}
       <button
         className="text-gold text-sm mb-3 underline underline-offset-2"

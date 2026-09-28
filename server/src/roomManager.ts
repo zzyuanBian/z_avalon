@@ -4,6 +4,7 @@ import { generateRoomCode } from './utils.js';
 
 export interface Room {
   id: string;
+  name: string;
   players: Player[];
   hostId: string;
   gameState: GameState | null;
@@ -12,7 +13,7 @@ export interface Room {
 
 const rooms = new Map<string, Room>();
 
-export function createRoom(playerName: string): { room: Room; playerId: string } {
+export function createRoom(playerName: string, roomName?: string): { room: Room; playerId: string } {
   const roomId = generateRoomCode(rooms);
   const playerId = uuid();
 
@@ -25,6 +26,7 @@ export function createRoom(playerName: string): { room: Room; playerId: string }
 
   const room: Room = {
     id: roomId,
+    name: roomName?.trim() || '',
     players: [player],
     hostId: playerId,
     gameState: null,

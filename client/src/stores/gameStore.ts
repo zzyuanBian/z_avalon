@@ -25,7 +25,7 @@ interface GameStore {
   setError: (error: string | null) => void;
 
   // Game actions
-  createRoom: (playerName: string) => void;
+  createRoom: (playerName: string, roomName?: string) => void;
   joinRoom: (roomId: string, playerName: string) => void;
   leaveRoom: () => void;
   reconnect: (roomId: string, playerId: string) => void;
@@ -79,16 +79,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setError: (error) => set({ error }),
 
-  createRoom: (playerName) => {
+  createRoom: (playerName, roomName) => {
     const socket = connectSocket();
     set({ connected: true, playerName });
     // Wait for connection if not connected
     if (!socket.connected) {
       socket.once('connect', () => {
-        socket.send('room:create', { playerName });
+        socket.send('room:create', { playerName, roomName: roomName || '' });
       });
     } else {
-      socket.send('room:create', { playerName });
+      socket.send('room:create', { playerName, roomName: roomName || '' });
     }
   },
 

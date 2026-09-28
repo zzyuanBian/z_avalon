@@ -6,6 +6,20 @@ export default function TeamSelector() {
   if (!view) return null;
 
   const canPropose = selectedTeam.length === view.teamSize;
+  const leader = view.players.find(p => p.seatIndex === view.leaderIndex);
+
+  // Non-leaders see a waiting message
+  if (!view.isLeader) {
+    return (
+      <div className="fade-in text-center py-8">
+        <div className="text-4xl mb-4">♕</div>
+        <p className="text-gold font-serif text-lg">等待队长提名队伍</p>
+        <p className="text-slate-400 text-sm mt-2">
+          队长 <span className="text-gold">{leader?.name}</span> 正在选人
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="fade-in">

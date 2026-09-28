@@ -55,6 +55,7 @@ export interface LogEntry {
 
 export interface GameState {
   roomId: string;
+  roomName: string;
   phase: GamePhase;
   players: Player[];
   roles: RoleAssignment[];
@@ -77,6 +78,7 @@ export interface GameState {
 
 export interface PlayerView {
   roomId: string;
+  roomName: string;
   phase: GamePhase;
   players: Player[];
   myRole: Role | null;

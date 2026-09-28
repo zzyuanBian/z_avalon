@@ -8,6 +8,7 @@ interface Props {
 export default function HomeScreen({ onHistory }: Props) {
   const [mode, setMode] = useState<'home' | 'create' | 'join'>('home');
   const [playerName, setPlayerName] = useState('');
+  const [roomName, setRoomName] = useState('');
   const [roomId, setRoomId] = useState('');
   const { createRoom, joinRoom, error, setError } = useGameStore();
 
@@ -28,7 +29,7 @@ export default function HomeScreen({ onHistory }: Props) {
       setError('请输入昵称');
       return;
     }
-    createRoom(playerName.trim());
+    createRoom(playerName.trim(), roomName.trim());
   };
 
   const handleJoin = () => {
@@ -81,7 +82,14 @@ export default function HomeScreen({ onHistory }: Props) {
           <h2 className="font-serif text-xl text-center text-gold-light">创建新房间</h2>
           <input
             className="input-field text-center text-lg"
-            placeholder="输入你的昵称"
+            placeholder="房间名称（选填）"
+            value={roomName}
+            onChange={(e) => setRoomName(e.target.value)}
+            maxLength={30}
+          />
+          <input
+            className="input-field text-center text-lg"
+            placeholder="你的昵称"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
             maxLength={20}
@@ -92,7 +100,7 @@ export default function HomeScreen({ onHistory }: Props) {
           </button>
           <button
             className="text-slate-400 hover:text-white w-full py-2"
-            onClick={() => { setMode('home'); setError(null); }}
+            onClick={() => { setMode('home'); setError(null); setRoomName(''); }}
           >
             返回
           </button>
