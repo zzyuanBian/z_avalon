@@ -35,7 +35,18 @@ function App() {
       const state = useGameStore.getState();
       setPlayerInfo(data.playerId, state.playerName || '', state.roomId || '');
     };
-    const onRoomError = (data: any) => setError(data.message);
+    const onRoomError = (data: any) => {
+      setError(data.message);
+      // If reconnect failed, clear saved session so user can start fresh
+      try {
+        const savedPlayerId = sessionStorage.getItem('avalon_playerId');
+        if (savedPlayerId && !useGameStore.getState().view) {
+          sessionStorage.removeItem('avalon_playerId');
+          sessionStorage.removeItem('avalon_playerName');
+          sessionStorage.removeItem('avalon_roomId');
+        }
+      } catch {}
+    };
     const onGameState = (newView: any) => { updateView(newView); setError(null); };
     const onGameError = (data: any) => setError(data.message);
 

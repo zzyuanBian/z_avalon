@@ -41,6 +41,13 @@ export function joinRoom(roomId: string, playerName: string): { room: Room; play
   if (room.players.length >= 10) return { error: '房间已满（最多10人）' };
   if (room.gameState && room.gameState.phase !== 'lobby') return { error: '游戏已经开始' };
 
+  // Check if a disconnected player with same name exists (reconnection scenario)
+  const disconnectedPlayer = room.players.find(p => p.name === playerName && !p.connected);
+  if (disconnectedPlayer) {
+    disconnectedPlayer.connected = true;
+    return { room, playerId: disconnectedPlayer.id };
+  }
+
   const duplicate = room.players.find(p => p.name === playerName);
   if (duplicate) return { error: '该昵称已被使用' };
 

@@ -222,6 +222,19 @@ function handleReconnect(ws: WebSocket, data: any): void {
     return;
   }
 
+  // Close any old WebSocket connection for this player
+  const sockets = roomSockets.get(data.roomId);
+  if (sockets) {
+    for (const oldWs of sockets) {
+      const info = wsMap.get(oldWs);
+      if (info && info.playerId === data.playerId && oldWs !== ws) {
+        oldWs.close(1000, 'reconnect');
+        wsMap.delete(oldWs);
+        sockets.delete(oldWs);
+      }
+    }
+  }
+
   setPlayerConnected(data.roomId, data.playerId, true);
   wsMap.set(ws, { roomId: data.roomId, playerId: data.playerId });
   joinWsRoom(ws, data.roomId);
