@@ -45,9 +45,9 @@ interface AvatarImageProps {
 }
 
 const SIZES = {
-  sm: 'w-6 h-6 text-xs',
-  md: 'w-10 h-10 text-lg',
-  lg: 'w-14 h-14 text-2xl',
+  sm: 'w-6 h-6',
+  md: 'w-10 h-10',
+  lg: 'w-14 h-14',
 };
 
 export function AvatarImage({ avatarId, size = 'md', ring }: AvatarImageProps) {
@@ -55,11 +55,12 @@ export function AvatarImage({ avatarId, size = 'md', ring }: AvatarImageProps) {
   const sizeClass = SIZES[size];
 
   return (
-    <div
-      className={`rounded-full flex items-center justify-center ${avatar.bgColor} ${sizeClass} ${ring || ''}`}
+    <img
+      src={`/avatars/avatar-${avatarId}.png`}
+      alt={avatar.name}
       title={avatar.name}
-    >
-      <span className="select-none">{avatar.icon}</span>
-    </div>
+      className={`rounded-full object-cover ${sizeClass} ${ring || ''}`}
+      draggable={false}
+    />
   );
 }
