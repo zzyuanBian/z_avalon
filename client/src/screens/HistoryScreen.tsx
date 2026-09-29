@@ -71,6 +71,83 @@ export default function HistoryScreen({ onBack }: Props) {
     window.open(`${apiBase}/api/games/${gameId}/export`, '_blank');
   }
 
+  async function copySummary() {
+    if (!selectedGame) return;
+    const state = selectedGame.fullState;
+    if (!state) return;
+
+    const getPlayerName = (id: string) => {
+      const p = selectedGame.players.find((pl: any) => pl.id === id);
+      return p?.name || '未知';
+    };
+
+    const roleNames: Record<string, string> = {
+      merlin: '梅林', percival: '派西维尔', loyal_servant: '忠臣',
+      morgana: '莫甘娜', assassin: '刺客', minion_of_mordred: '爪牙', oberon: '奥伯伦',
+    };
+
+    const date = new Date(selectedGame.createdAt);
+    const dateStr = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    const winnerText = selectedGame.winner === 'good' ? '⚜ 善良方胜利' : selectedGame.winner === 'evil' ? '☠ 邪恶方胜利' : '未完成';
+
+    const lines: string[] = [
+      '🏰 阿瓦隆对局记录',
+      `房间: ${selectedGame.roomId} · ${dateStr} · ${selectedGame.playerCount}人`,
+      `结果: ${winnerText}`,
+      selectedGame.winReason ? `      ${selectedGame.winReason}` : '',
+      '',
+      '👥 玩家身份',
+    ];
+
+    if (state.roles) {
+      for (const r of state.roles) {
+        const tag = r.alignment === 'evil' ? '🔴' : '🔵';
+        lines.push(`  ${tag} ${getPlayerName(r.playerId)} → ${roleNames[r.role] || r.role}`);
+      }
+    }
+
+    const roundHistory = state.roundHistory || [];
+    const missionResults = state.missionResults || [];
+    if (roundHistory.length > 0) {
+      lines.push('');
+      lines.push('📜 对局复盘');
+      const goodWins = missionResults.filter((r: any) => r.success).length;
+      const evilWins = missionResults.filter((r: any) => !r.success).length;
+      lines.push(`  总比分: ${goodWins} 成功 / ${evilWins} 失败`);
+      lines.push('');
+      for (const rh of roundHistory) {
+        lines.push(`  ── 第${rh.round}轮 ──`);
+        for (let i = 0; i < rh.proposals.length; i++) {
+          const prop = rh.proposals[i];
+          const teamNames = prop.team.map((id: string) => getPlayerName(id)).join('、');
+          const voteStr = prop.vote.approved
+            ? `✓ ${prop.vote.approveCount}同意/${prop.vote.rejectCount}拒绝`
+            : `✗ ${prop.vote.approveCount}同意/${prop.vote.rejectCount}拒绝`;
+          lines.push(`  提名${i + 1}: ${getPlayerName(prop.leader)} → [${teamNames}]`);
+          lines.push(`  投票: ${voteStr}`);
+        }
+        if (rh.questResult) {
+          const resultStr = rh.questResult.success ? '✓ 任务成功' : '✗ 任务失败';
+          lines.push(`  任务: ${resultStr} (${rh.questResult.successCount}成功/${rh.questResult.failCount}失败)`);
+        }
+        lines.push('');
+      }
+    }
+
+    if (state.funVoteResult?.length > 0) {
+      lines.push(`🤡 最愚玩家: ${getPlayerName(state.funVoteResult[0].playerId)} (${state.funVoteResult[0].voteCount}票)`);
+    }
+
+    const text = lines.filter(l => l !== undefined).join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      setError('✅ 摘要已复制到剪贴板');
+      setTimeout(() => setError(null), 2000);
+    } catch {
+      setError('复制失败，请手动复制');
+    }
+  }
+
   function formatDate(timestamp: number) {
     const d = new Date(timestamp);
     return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}`;
@@ -161,12 +238,20 @@ export default function HistoryScreen({ onBack }: Props) {
             </div>
           )}
 
-          <button
-            className="btn-gold w-full"
-            onClick={() => exportGame(selectedGame.id)}
-          >
-            导出游戏记录
-          </button>
+          <div className="flex gap-2">
+            <button
+              className="btn-gold flex-1"
+              onClick={copySummary}
+            >
+              📋 复制摘要
+            </button>
+            <button
+              className="flex-1 py-2 px-4 rounded-lg bg-slate-700 text-slate-300 text-sm font-semibold hover:bg-slate-600 transition-colors"
+              onClick={() => exportGame(selectedGame.id)}
+            >
+              📥 导出文件
+            </button>
+          </div>
         </div>
       </div>
     );
