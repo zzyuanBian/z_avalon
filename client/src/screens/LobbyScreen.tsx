@@ -7,6 +7,7 @@ import PlayerList from '../components/PlayerList';
 export default function LobbyScreen() {
   const { view, playerId, startGame, leaveRoom, error } = useGameStore();
   const [showQR, setShowQR] = useState(false);
+  const [shareTip, setShareTip] = useState('');
 
   // Build join URL with room code as parameter
   const joinUrl = useMemo(() => {
@@ -21,6 +22,36 @@ export default function LobbyScreen() {
   const playerCount = view.players.length;
   const canStart = playerCount >= 5 && playerCount <= 10;
 
+  const shareText = view.roomName
+    ? `来玩阿瓦隆！「${view.roomName}」房间 ${view.roomId}`
+    : `来玩阿瓦隆！房间码 ${view.roomId}`;
+
+  async function handleShare() {
+    // Try native Web Share API (mobile)
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: '阿瓦隆 - 加入房间',
+          text: shareText,
+          url: joinUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or share failed, fall through to clipboard
+      }
+    }
+
+    // Fallback: copy link to clipboard
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${joinUrl}`);
+      setShareTip('链接已复制，快去粘贴分享吧！');
+    } catch {
+      // Clipboard API failed, show manual copy
+      setShareTip(joinUrl);
+    }
+    setTimeout(() => setShareTip(''), 3000);
+  }
+
   return (
     <div className="min-h-screen flex flex-col items-center px-4 py-6 fade-in">
       {/* Room Code */}
@@ -31,13 +62,28 @@ export default function LobbyScreen() {
         <p className="text-gold-light font-serif text-sm mb-2">{view.roomName}</p>
       )}
 
-      {/* QR Code toggle */}
-      <button
-        className="text-gold text-sm mb-3 underline underline-offset-2"
-        onClick={() => setShowQR(!showQR)}
-      >
-        {showQR ? '隐藏二维码' : '显示二维码给朋友扫'}
-      </button>
+      {/* Share & QR Code */}
+      <div className="flex gap-3 mb-3">
+        <button
+          className="text-gold text-sm underline underline-offset-2"
+          onClick={() => setShowQR(!showQR)}
+        >
+          {showQR ? '隐藏二维码' : '显示二维码'}
+        </button>
+        <span className="text-slate-600">|</span>
+        <button
+          className="text-gold text-sm underline underline-offset-2"
+          onClick={handleShare}
+        >
+          📤 一键分享
+        </button>
+      </div>
+
+      {shareTip && (
+        <div className="bg-good/20 border border-good text-good-light px-4 py-2 rounded-lg mb-3 text-sm text-center max-w-sm fade-in">
+          {shareTip}
+        </div>
+      )}
 
       {showQR && (
         <div className="bg-white p-4 rounded-xl mb-4 fade-in">
