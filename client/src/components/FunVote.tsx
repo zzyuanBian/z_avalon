@@ -84,7 +84,7 @@ export default function FunVote() {
             <img
               src="/fool.png"
               alt="最愚玩家"
-              className="w-28 h-28 mx-auto mb-2 object-contain drop-shadow-lg animate-bounce"
+              className="w-28 h-28 mx-auto mb-2 object-contain drop-shadow-lg"
             />
             <div className="text-gold font-serif text-lg font-bold">
               {topPlayer.name}
