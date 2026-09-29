@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { ROLE_INFO } from '@shared/constants';
 
@@ -6,6 +6,14 @@ export default function FunVote() {
   const { view, playerId, submitFunVote } = useGameStore();
   const [selected, setSelected] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
+  const [foolImg, setFoolImg] = useState(1);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFoolImg(prev => prev === 1 ? 2 : 1);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
 
   if (!view) return null;
 
@@ -70,11 +78,31 @@ export default function FunVote() {
 
         {/* Waiting for votes */}
         {hasVoted && !result && (
-          <div className="text-center text-slate-400 text-sm py-3">
-            已投票，等待其他玩家...
-            <span className="text-slate-500 ml-1">
-              ({view.funVotesSubmitted}/{view.totalPlayers})
-            </span>
+          <div className="py-3">
+            <div className="text-center text-slate-400 text-sm mb-2">
+              已投票，等待其他玩家...
+              <span className="text-slate-500 ml-1">
+                ({view.funVotesSubmitted}/{view.totalPlayers})
+              </span>
+            </div>
+            <div className="space-y-1">
+              {[...view.players].sort((a, b) => a.seatIndex - b.seatIndex).map(player => {
+                const hasPlayerVoted = view.funVotersSubmitted.includes(player.id);
+                const isMe = player.id === playerId;
+                return (
+                  <div key={player.id} className={`flex items-center justify-between px-3 py-1 rounded-lg text-xs ${
+                    isMe ? 'bg-slate-700/50' : ''
+                  }`}>
+                    <span className={`${isMe ? 'text-white' : 'text-slate-300'}`}>
+                      {player.name}{isMe && <span className="text-gold ml-1">(我)</span>}
+                    </span>
+                    <span className={hasPlayerVoted ? 'text-good' : 'text-slate-500'}>
+                      {hasPlayerVoted ? '✓ 已投' : '未投'}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -82,7 +110,7 @@ export default function FunVote() {
         {result && topPlayer && (
           <div className="text-center py-2">
             <img
-              src="/fool.png"
+              src={`/fool${foolImg}.png`}
               alt="最愚玩家"
               className="w-28 h-28 mx-auto mb-2 object-contain drop-shadow-lg"
             />

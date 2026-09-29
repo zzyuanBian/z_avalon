@@ -68,8 +68,28 @@ export default function RoleRevealScreen() {
       )}
 
       {/* Ready status */}
-      <div className="text-slate-400 text-sm mb-4">
-        {view.readyCount} / {view.totalPlayers} 已准备
+      <div className="w-full max-w-sm mb-4">
+        <div className="text-slate-400 text-sm text-center mb-2">
+          {view.readyCount} / {view.totalPlayers} 已准备
+        </div>
+        <div className="space-y-1">
+          {[...view.players].sort((a, b) => a.seatIndex - b.seatIndex).map(player => {
+            const isReady = view.readyPlayers.includes(player.id);
+            const isMe = player.id === playerId;
+            return (
+              <div key={player.id} className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-sm ${
+                isMe ? 'bg-slate-700/50' : 'bg-nightLight'
+              }`}>
+                <span className={`${isMe ? 'text-white font-medium' : 'text-slate-300'}`}>
+                  {player.name}{isMe && <span className="text-gold text-xs ml-1">(我)</span>}
+                </span>
+                <span className={`text-xs font-medium ${isReady ? 'text-good' : 'text-slate-500'}`}>
+                  {isReady ? '✓ 已准备' : '未准备'}
+                </span>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Ready button */}

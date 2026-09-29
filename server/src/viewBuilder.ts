@@ -32,6 +32,7 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     winner: state.winner,
     winReason: state.winReason,
     funVotesSubmitted: Object.keys(state.funVotes).length,
+    funVotersSubmitted: Object.keys(state.funVotes),
     funVoteResult: null,
     isLeader,
     isOnTeam,
@@ -39,6 +40,7 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     log: state.log.map(l => ({ ...l })),
     hostId: state.hostId,
     readyCount: state.readyPlayers.length,
+    readyPlayers: [...state.readyPlayers],
     roleConfig: state.customRoleConfig || ROLE_CONFIGS[state.players.length] || { good: [], evil: [] },
     chatMessages: state.chatMessages.slice(-50).map(m => ({ ...m })),
     propsRemaining: (() => {
@@ -48,6 +50,11 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
         egg: PROPS_LIMIT.egg - used.egg,
       };
     })(),
+    roundHistory: state.roundHistory.map(rh => ({
+      ...rh,
+      proposals: rh.proposals.map(p => ({ ...p, team: [...p.team], vote: { ...p.vote } })),
+      questResult: rh.questResult ? { ...rh.questResult } : undefined,
+    })),
   };
 
   // Phase-specific data filtering

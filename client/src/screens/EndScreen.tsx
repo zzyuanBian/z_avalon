@@ -1,6 +1,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { ROLE_INFO } from '@shared/constants';
 import FunVote from '../components/FunVote';
+import GameRecap from '../components/GameRecap';
 import { AvatarImage } from '../components/Avatars';
 
 export default function EndScreen() {
@@ -46,6 +47,14 @@ export default function EndScreen() {
           <div className="text-slate-400 text-xs">失败</div>
         </div>
       </div>
+
+      {/* Game recap */}
+      <GameRecap
+        roundHistory={view.roundHistory}
+        players={view.players}
+        allRoles={view.allRoles}
+        playerCount={view.totalPlayers}
+      />
 
       {/* Role reveal table */}
       <div className="w-full max-w-sm mb-6">

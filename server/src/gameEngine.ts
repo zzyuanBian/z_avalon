@@ -1,4 +1,4 @@
-import type { GameState, Player, RoleAssignment, Alignment, Role, MissionResult, LogEntry, KnownPlayers, RoleConfig, ChatMessage, PropType } from '../../shared/types.js';
+import type { GameState, Player, RoleAssignment, Alignment, Role, MissionResult, LogEntry, KnownPlayers, RoleConfig, ChatMessage, PropType, RoundHistory } from '../../shared/types.js';
 import { ROLE_CONFIGS, TEAM_SIZES, failsRequired, WINS_NEEDED, MAX_CONSECUTIVE_REJECTIONS, validateRoleConfig, PROPS_LIMIT } from '../../shared/constants.js';
 import { shuffle } from './utils.js';
 
@@ -34,6 +34,7 @@ export class GameEngine {
       customRoleConfig: null,
       chatMessages: [],
       propsUsed: {},
+      roundHistory: [],
     };
   }
 
@@ -185,6 +186,14 @@ export class GameEngine {
     this.state.votes = {};
     this.state.phase = 'voting';
 
+    // Record proposal in round history
+    let roundHist = this.state.roundHistory.find(rh => rh.round === this.state.currentRound);
+    if (!roundHist) {
+      roundHist = { round: this.state.currentRound, proposals: [] };
+      this.state.roundHistory.push(roundHist);
+    }
+    roundHist.proposals.push({ leader: leader.id, team: [...team], vote: { approveCount: 0, rejectCount: 0, approved: false } });
+
     const teamNames = team.map(id => {
       const p = this.state.players.find(pl => pl.id === id);
       return p?.name || '?';
@@ -218,6 +227,13 @@ export class GameEngine {
 
     // Record vote history
     this.state.voteHistory.push({ approveCount, rejectCount, approved });
+
+    // Record vote in round history
+    const roundHist = this.state.roundHistory.find(rh => rh.round === this.state.currentRound);
+    if (roundHist && roundHist.proposals.length > 0) {
+      const lastProposal = roundHist.proposals[roundHist.proposals.length - 1];
+      lastProposal.vote = { approveCount, rejectCount, approved };
+    }
 
     // Clear votes for anonymity (no per-player tracking)
     this.state.votes = {};
@@ -308,6 +324,12 @@ export class GameEngine {
     // Clear quest decisions for anonymity
     this.state.questDecisions = {};
     this.state.phase = 'quest_result';
+
+    // Record quest result in round history
+    const roundHist = this.state.roundHistory.find(rh => rh.round === this.state.currentRound);
+    if (roundHist) {
+      roundHist.questResult = { success, failCount, successCount };
+    }
 
     const goodWins = this.state.missionResults.filter(r => r.success).length;
     const evilWins = this.state.missionResults.filter(r => !r.success).length;
@@ -538,5 +560,6 @@ export class GameEngine {
     this.state.customRoleConfig = null;
     this.state.chatMessages = [];
     this.state.propsUsed = {};
+    this.state.roundHistory = [];
   }
 }

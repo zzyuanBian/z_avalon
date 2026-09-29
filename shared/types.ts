@@ -75,6 +75,18 @@ export interface VoteRecord {
   approved: boolean;
 }
 
+export interface TeamProposal {
+  leader: string;
+  team: string[];
+  vote: { approveCount: number; rejectCount: number; approved: boolean };
+}
+
+export interface RoundHistory {
+  round: number;
+  proposals: TeamProposal[];
+  questResult?: { success: boolean; failCount: number; successCount: number };
+}
+
 export interface LogEntry {
   timestamp: number;
   type: 'round_start' | 'team_proposed' | 'vote_result'
@@ -110,6 +122,7 @@ export interface GameState {
   customRoleConfig: RoleConfig | null;
   chatMessages: ChatMessage[];
   propsUsed: Record<string, { flower: number; egg: number }>;
+  roundHistory: RoundHistory[];
 }
 
 export interface PlayerView {
@@ -137,6 +150,7 @@ export interface PlayerView {
   winner: Alignment | null;
   winReason: string | null;
   funVotesSubmitted: number;
+  funVotersSubmitted: string[];
   funVoteResult: { playerId: string; voteCount: number }[] | null;
   allRoles?: RoleAssignment[];
   isLeader: boolean;
@@ -145,9 +159,11 @@ export interface PlayerView {
   log: LogEntry[];
   hostId: string;
   readyCount: number;
+  readyPlayers: string[];
   roleConfig: RoleConfig;
   chatMessages: ChatMessage[];
   propsRemaining: { flower: number; egg: number };
+  roundHistory: RoundHistory[];
 }
 
 export interface ClientToServerEvents {

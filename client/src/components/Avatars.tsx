@@ -48,12 +48,13 @@ export function preloadAvatars(): void {
 
 interface AvatarImageProps {
   avatarId: number;
-  size?: 'sm' | 'md' | 'lg';
+  size?: 'xs' | 'sm' | 'md' | 'lg';
   ring?: string;
   title?: string;
 }
 
 const SIZES = {
+  xs: 'w-4 h-4',
   sm: 'w-6 h-6',
   md: 'w-10 h-10',
   lg: 'w-14 h-14',

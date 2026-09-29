@@ -112,9 +112,9 @@ export default function ChatPanel() {
                 return (
                   <div key={msg.id} className={`flex items-start gap-1.5 ${isMe ? 'flex-row-reverse' : ''}`}>
                     <AvatarImage avatarId={sender?.avatar ?? 0} size="sm" />
-                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                    <div className={`flex flex-col min-w-0 flex-1 ${isMe ? 'items-end' : 'items-start'}`}>
                       <span className="text-slate-500 text-[10px] mb-0.5 px-1">{msg.playerName}</span>
-                      <div className={`max-w-[80%] px-3 py-1.5 rounded-xl text-sm break-words ${
+                      <div className={`max-w-[90%] px-3 py-1.5 rounded-xl text-sm break-words ${
                         isMe
                           ? 'bg-gold/20 text-gold-light rounded-br-sm'
                           : 'bg-slate-700 text-slate-200 rounded-bl-sm'
