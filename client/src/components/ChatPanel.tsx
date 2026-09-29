@@ -4,8 +4,20 @@ import { getSocket } from '../socket';
 import { AvatarImage } from './Avatars';
 import type { ChatMessage } from '@shared/types';
 
+const MARK_LABELS: Record<string, string> = {
+  merlin: '梅林', percival: '派西维尔', loyal_servant: '忠臣',
+  morgana: '莫甘娜', assassin: '刺客', minion_of_mordred: '爪牙', oberon: '奥伯伦',
+  good: '好人', evil: '坏人',
+};
+
+const KNOWN_DOT_COLORS: Record<string, string> = {
+  '邪恶': 'bg-red-400',
+  '梅林?': 'bg-purple-400',
+  '邪恶队友': 'bg-red-400',
+};
+
 export default function ChatPanel() {
-  const { view, playerId, sendChatMessage } = useGameStore();
+  const { view, playerId, playerMarks, sendChatMessage } = useGameStore();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -109,9 +121,35 @@ export default function ChatPanel() {
               {messages.map(msg => {
                 const isMe = msg.playerId === playerId;
                 const sender = view.players.find(p => p.id === msg.playerId);
+                // Collect marks for this sender
+                const systemMark = view.knownPlayers[msg.playerId];
+                const manualMarks = playerMarks[msg.playerId] || [];
                 return (
                   <div key={msg.id} className={`flex items-start gap-1.5 ${isMe ? 'flex-row-reverse' : ''}`}>
-                    <AvatarImage avatarId={sender?.avatar ?? 0} size="sm" />
+                    <div className="flex flex-col items-center">
+                      <AvatarImage avatarId={sender?.avatar ?? 0} size="sm" />
+                      {/* Marks as tiny dots */}
+                      {(systemMark || manualMarks.length > 0) && (
+                        <div className="flex gap-0.5 mt-0.5">
+                          {systemMark && (
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${KNOWN_DOT_COLORS[systemMark] || 'bg-slate-400'}`}
+                              title={systemMark}
+                            />
+                          )}
+                          {manualMarks.slice(0, 3).map(mark => {
+                            const isEvil = ['evil', 'morgana', 'assassin', 'minion_of_mordred', 'oberon'].includes(mark);
+                            return (
+                              <span
+                                key={mark}
+                                className={`w-1.5 h-1.5 rounded-full ${isEvil ? 'bg-evil-light' : 'bg-good-light'}`}
+                                title={MARK_LABELS[mark] || mark}
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                     <div className={`flex flex-col min-w-0 flex-1 ${isMe ? 'items-end' : 'items-start'}`}>
                       <span className="text-slate-500 text-[10px] mb-0.5 px-1">{msg.playerName}</span>
                       <div className={`max-w-[90%] px-3 py-1.5 rounded-xl text-sm break-words ${
