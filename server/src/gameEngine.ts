@@ -412,7 +412,7 @@ export class GameEngine {
   }
 
   private advanceLeader(): void {
-    this.state.leaderIndex = (this.state.leaderIndex + 1) % this.state.players.length;
+    this.state.leaderIndex = (this.state.leaderIndex - 1 + this.state.players.length) % this.state.players.length;
   }
 
   private getRequiredTeamSize(): number {
