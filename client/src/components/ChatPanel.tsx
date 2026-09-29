@@ -31,16 +31,26 @@ export default function ChatPanel() {
     return () => { socket.off('chat:message', handler); };
   }, [open]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll to bottom on new messages
   useEffect(() => {
     if (listRef.current) {
       listRef.current.scrollTop = listRef.current.scrollHeight;
     }
   }, [messages]);
 
-  // Reset unread on open
+  // Scroll to bottom when panel opens
   useEffect(() => {
-    if (open) setUnread(0);
+    if (open) {
+      setUnread(0);
+      // Delay to let the DOM render before scrolling
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (listRef.current) {
+            listRef.current.scrollTop = listRef.current.scrollHeight;
+          }
+        });
+      });
+    }
   }, [open]);
 
   if (!view) return null;
