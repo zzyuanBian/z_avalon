@@ -138,6 +138,7 @@ function handleMessage(ws: WebSocket, msg: WsMessage): void {
     case 'room:create': handleRoomCreate(ws, data); break;
     case 'room:join': handleRoomJoin(ws, data); break;
     case 'room:leave': handleRoomLeave(ws); break;
+    case 'room:kick': handleRoomKick(ws, data); break;
     case 'room:reconnect': handleReconnect(ws, data); break;
     case 'game:start': handleGameStart(ws); break;
     case 'game:ready': handleGameReady(ws); break;
@@ -235,6 +236,65 @@ function handleRoomLeave(ws: WebSocket): void {
   removePlayerFromRoom(info.roomId, info.playerId);
   leaveWsRoom(ws, info.roomId);
   wsMap.delete(ws);
+}
+
+function handleRoomKick(ws: WebSocket, data: any): void {
+  const info = wsMap.get(ws);
+  if (!info) return;
+
+  const room = getRoom(info.roomId);
+  if (!room) return;
+
+  // Only host can kick
+  if (room.hostId !== info.playerId) {
+    send(ws, 'room:error', { message: '只有房主可以踢人' });
+    return;
+  }
+
+  // Only in lobby phase
+  if (room.gameState && room.gameState.phase !== 'lobby') {
+    send(ws, 'room:error', { message: '游戏已经开始，无法踢人' });
+    return;
+  }
+
+  const targetId = data?.targetId;
+  if (!targetId || targetId === info.playerId) {
+    send(ws, 'room:error', { message: '不能踢自己' });
+    return;
+  }
+
+  const targetPlayer = room.players.find(p => p.id === targetId);
+  if (!targetPlayer) {
+    send(ws, 'room:error', { message: '玩家不存在' });
+    return;
+  }
+
+  // Send kicked event to the target player and close their connection
+  const sockets = roomSockets.get(info.roomId);
+  if (sockets) {
+    for (const targetWs of sockets) {
+      const targetInfo = wsMap.get(targetWs);
+      if (targetInfo && targetInfo.playerId === targetId) {
+        send(targetWs, 'room:kicked', { reason: '你被房主踢出了房间' });
+        targetWs.close(1000, 'kicked');
+        wsMap.delete(targetWs);
+        sockets.delete(targetWs);
+        break;
+      }
+    }
+  }
+
+  // Remove player from room
+  removePlayerFromRoom(info.roomId, targetId);
+
+  // Update engine state and emit to remaining players
+  const engine = engines.get(info.roomId);
+  if (engine) {
+    engine.state.players = room.players.map(p => ({ ...p, connected: true }));
+    emitGameStates(info.roomId);
+  }
+
+  console.log(`[room:kick] ${info.roomId} kicked ${targetPlayer.name} (${targetId})`);
 }
 
 function handleReconnect(ws: WebSocket, data: any): void {

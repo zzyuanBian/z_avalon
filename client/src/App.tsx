@@ -55,12 +55,24 @@ function App() {
     };
     const onGameState = (newView: any) => { updateView(newView); setError(null); };
     const onGameError = (data: any) => setError(data.message);
+    const onRoomKicked = (data: any) => {
+      setError(data.reason || '你被踢出了房间');
+      // Clear local state without sending room:leave (socket already closed by server)
+      useGameStore.setState({ playerId: null, playerName: null, roomId: null, view: null });
+      try {
+        sessionStorage.removeItem('avalon_playerId');
+        sessionStorage.removeItem('avalon_playerName');
+        sessionStorage.removeItem('avalon_roomId');
+        sessionStorage.removeItem('avalon_avatar');
+      } catch {}
+    };
 
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('room:created', onRoomCreated);
     socket.on('room:joined', onRoomJoined);
     socket.on('room:error', onRoomError);
+    socket.on('room:kicked', onRoomKicked);
     socket.on('game:state', onGameState);
     socket.on('game:error', onGameError);
 
@@ -70,6 +82,7 @@ function App() {
       socket.off('room:created', onRoomCreated);
       socket.off('room:joined', onRoomJoined);
       socket.off('room:error', onRoomError);
+      socket.off('room:kicked', onRoomKicked);
       socket.off('game:state', onGameState);
       socket.off('game:error', onGameError);
     };

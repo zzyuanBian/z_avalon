@@ -29,9 +29,10 @@ interface PlayerListProps {
   proposedTeam: string[];
   knownPlayers: KnownPlayers;
   totalPlayers: number;
+  onKick?: (playerId: string) => void;
 }
 
-export default function PlayerList({ players, leaderIndex, proposedTeam, knownPlayers, totalPlayers }: PlayerListProps) {
+export default function PlayerList({ players, leaderIndex, proposedTeam, knownPlayers, totalPlayers, onKick }: PlayerListProps) {
   const { playerId, playerMarks, view, throwProp } = useGameStore();
   const [markingTarget, setMarkingTarget] = useState<{ id: string; name: string } | null>(null);
   const sorted = [...players].sort((a, b) => a.seatIndex - b.seatIndex);
@@ -113,6 +114,15 @@ export default function PlayerList({ players, leaderIndex, proposedTeam, knownPl
                 {/* Disconnected indicator */}
                 {disconnected && (
                   <span className="text-evil text-xs ml-auto flex-shrink-0">离线</span>
+                )}
+
+                {/* Kick button (host only, lobby only) */}
+                {onKick && !isMe && (
+                  <button
+                    className="text-slate-500 hover:text-evil text-xs ml-auto flex-shrink-0 px-1"
+                    onClick={(e) => { e.stopPropagation(); onKick(player.id); }}
+                    title="踢出房间"
+                  >✕</button>
                 )}
 
                 {/* Prop buttons */}

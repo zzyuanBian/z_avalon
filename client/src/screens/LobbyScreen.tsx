@@ -6,7 +6,7 @@ import PlayerList from '../components/PlayerList';
 import RoleConfigurator from '../components/RoleConfigurator';
 
 export default function LobbyScreen() {
-  const { view, playerId, startGame, leaveRoom, error } = useGameStore();
+  const { view, playerId, startGame, leaveRoom, kickPlayer, error } = useGameStore();
   const [showQR, setShowQR] = useState(false);
   const [shareTip, setShareTip] = useState('');
 
@@ -102,7 +102,7 @@ export default function LobbyScreen() {
 
       {/* Player list */}
       <div className="w-full max-w-sm mb-4">
-        <PlayerList players={view.players} leaderIndex={-1} proposedTeam={[]} knownPlayers={{}} totalPlayers={view.players.length} />
+        <PlayerList players={view.players} leaderIndex={-1} proposedTeam={[]} knownPlayers={{}} totalPlayers={view.players.length} onKick={isHost ? kickPlayer : undefined} />
       </div>
 
       {/* Role configuration (host only) */}

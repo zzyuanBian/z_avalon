@@ -30,6 +30,7 @@ interface GameStore {
   createRoom: (playerName: string, roomName?: string, avatar?: number) => void;
   joinRoom: (roomId: string, playerName: string, avatar?: number) => void;
   leaveRoom: () => void;
+  kickPlayer: (targetId: string) => void;
   reconnect: (roomId: string, playerId: string) => void;
   startGame: () => void;
   ready: () => void;
@@ -136,6 +137,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sessionStorage.removeItem('avalon_roomId');
       sessionStorage.removeItem('avalon_avatar');
     } catch {}
+  },
+
+  kickPlayer: (targetId) => {
+    getSocket().send('room:kick', { targetId });
   },
 
   reconnect: (roomId, playerId) => {

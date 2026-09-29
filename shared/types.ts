@@ -170,6 +170,7 @@ export interface ClientToServerEvents {
   'room:create': (data: { playerName: string; avatar: number }) => void;
   'room:join': (data: { roomId: string; playerName: string; avatar: number }) => void;
   'room:leave': () => void;
+  'room:kick': (data: { targetId: string }) => void;
   'room:reconnect': (data: { roomId: string; playerId: string }) => void;
   'game:start': () => void;
   'game:ready': () => void;
@@ -188,6 +189,7 @@ export interface ServerToClientEvents {
   'room:created': (data: { roomId: string; playerId: string }) => void;
   'room:joined': (data: { playerId: string }) => void;
   'room:error': (data: { message: string }) => void;
+  'room:kicked': (data: { reason: string }) => void;
   'game:state': (view: PlayerView) => void;
   'game:error': (data: { message: string }) => void;
   'chat:message': (data: ChatMessage) => void;
