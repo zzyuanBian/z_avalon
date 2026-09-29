@@ -31,11 +31,11 @@ interface Props {
 }
 
 export default function PlayerMarking({ playerId, playerName, totalPlayers, onClose }: Props) {
-  const { playerMarks, togglePlayerMark } = useGameStore();
+  const { playerMarks, togglePlayerMark, view } = useGameStore();
   const currentMarks = playerMarks[playerId] || [];
 
-  // Get roles available in this game configuration
-  const config = ROLE_CONFIGS[totalPlayers];
+  // Get roles available in this game configuration (prefer custom config from view)
+  const config = view?.roleConfig || ROLE_CONFIGS[totalPlayers];
   const availableRoles = new Set<string>();
   if (config) {
     config.good.forEach(r => availableRoles.add(r));

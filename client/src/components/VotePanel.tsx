@@ -27,8 +27,21 @@ export default function VotePanel() {
           <div className="text-slate-400 mb-2">
             等待其他玩家投票...
           </div>
-          <div className="text-good text-sm">
+          <div className="text-good text-sm mb-3">
             {view.votesSubmitted} / {view.totalPlayers} 已投票
+          </div>
+          <div className="space-y-1">
+            {view.players.map(p => {
+              const voted = view.votersSubmitted.includes(p.id);
+              return (
+                <div key={p.id} className="flex items-center justify-between text-xs px-3 py-1.5 rounded bg-nightLight/50">
+                  <span className="text-slate-300">{p.name}{p.id === view.hostId ? '' : ''}</span>
+                  <span className={voted ? 'text-good-light' : 'text-slate-500'}>
+                    {voted ? '✓ 已投票' : '⏳ 思考中'}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : (

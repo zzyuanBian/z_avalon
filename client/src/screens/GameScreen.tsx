@@ -10,6 +10,7 @@ import QuestResult from '../components/QuestResult';
 import AssassinPanel from '../components/AssassinPanel';
 import InfoPanel from '../components/InfoPanel';
 import GameLog from '../components/GameLog';
+import ThrowProps from '../components/ThrowProps';
 
 export default function GameScreen() {
   const { view } = useGameStore();
@@ -84,6 +85,9 @@ export default function GameScreen() {
 
       {/* Game log */}
       <GameLog log={view.log} playerNames={view.players.map(p => p.name)} />
+
+      {/* Throw props overlay */}
+      <ThrowProps />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import RoleRevealScreen from './screens/RoleRevealScreen';
 import GameScreen from './screens/GameScreen';
 import EndScreen from './screens/EndScreen';
 import HistoryScreen from './screens/HistoryScreen';
+import ChatPanel from './components/ChatPanel';
 
 function App() {
   const { view, playerName, setPlayerInfo, setConnected, updateView, setError, reconnect } = useGameStore();
@@ -104,6 +105,7 @@ function App() {
   return (
     <div className="min-h-screen bg-night">
       {renderScreen()}
+      {view && <ChatPanel />}
     </div>
   );
 }

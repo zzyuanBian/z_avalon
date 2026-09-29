@@ -31,10 +31,11 @@ interface PlayerListProps {
 }
 
 export default function PlayerList({ players, leaderIndex, proposedTeam, knownPlayers, totalPlayers }: PlayerListProps) {
-  const { playerId, playerMarks, view } = useGameStore();
+  const { playerId, playerMarks, view, throwProp } = useGameStore();
   const [markingTarget, setMarkingTarget] = useState<{ id: string; name: string } | null>(null);
   const sorted = [...players].sort((a, b) => a.seatIndex - b.seatIndex);
   const isGameActive = view?.phase !== 'game_over' && view?.phase !== 'lobby';
+  const canThrowProps = isGameActive && view && (view.propsRemaining.flower > 0 || view.propsRemaining.egg > 0);
 
   return (
     <div className="max-w-lg mx-auto">
@@ -112,6 +113,26 @@ export default function PlayerList({ players, leaderIndex, proposedTeam, knownPl
                 {/* Disconnected indicator */}
                 {disconnected && (
                   <span className="text-evil text-xs ml-auto flex-shrink-0">离线</span>
+                )}
+
+                {/* Prop buttons */}
+                {!isMe && canThrowProps && !disconnected && (
+                  <div className="flex gap-0.5 ml-auto flex-shrink-0">
+                    {view!.propsRemaining.flower > 0 && (
+                      <button
+                        className="text-sm hover:scale-125 transition-transform active:scale-90 p-0.5"
+                        onClick={(e) => { e.stopPropagation(); throwProp(player.id, 'flower'); }}
+                        title={`送花 (${view!.propsRemaining.flower})`}
+                      >🌸</button>
+                    )}
+                    {view!.propsRemaining.egg > 0 && (
+                      <button
+                        className="text-sm hover:scale-125 transition-transform active:scale-90 p-0.5"
+                        onClick={(e) => { e.stopPropagation(); throwProp(player.id, 'egg'); }}
+                        title={`扔鸡蛋 (${view!.propsRemaining.egg})`}
+                      >🥚</button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

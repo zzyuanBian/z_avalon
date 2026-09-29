@@ -10,6 +10,10 @@ const voteTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const questTimers = new Map<string, ReturnType<typeof setTimeout>>();
 // Track which players have submitted quest decisions (prevents duplicate messages)
 const questSubmitted = new Map<string, Set<string>>(); // roomId → Set<playerId>
+// Rate limits for chat (playerId → last timestamp)
+const chatRateLimits = new Map<string, number>();
+// Rate limits for props (playerId → last timestamp)
+const propRateLimits = new Map<string, number>();
 
 // Map WebSocket -> { roomId, playerId }
 const wsMap = new Map<WebSocket, { roomId: string; playerId: string }>();
@@ -143,6 +147,9 @@ function handleMessage(ws: WebSocket, msg: WsMessage): void {
     case 'game:assassinate': handleAssassinate(ws, data); break;
     case 'game:fun-vote': handleFunVote(ws, data); break;
     case 'game:play-again': handlePlayAgain(ws); break;
+    case 'game:set-role-config': handleSetRoleConfig(ws, data); break;
+    case 'chat:send': handleChatSend(ws, data); break;
+    case 'prop:throw': handlePropThrow(ws, data); break;
     default:
       send(ws, 'error', { message: `未知消息类型: ${type}` });
   }
@@ -462,4 +469,72 @@ function handlePlayAgain(ws: WebSocket): void {
     emitGameStates(info.roomId);
   }
   console.log(`[play-again] ${info.roomId}`);
+}
+
+function handleSetRoleConfig(ws: WebSocket, data: any): void {
+  const info = wsMap.get(ws);
+  if (!info) return;
+
+  const engine = engines.get(info.roomId);
+  if (!engine) return;
+
+  try {
+    engine.setRoleConfig(info.playerId, data.config);
+    emitGameStates(info.roomId);
+  } catch (e) {
+    send(ws, 'game:error', { message: (e as Error).message });
+  }
+}
+
+function handleChatSend(ws: WebSocket, data: any): void {
+  const info = wsMap.get(ws);
+  if (!info) return;
+
+  // Rate limit: 1 message per second
+  const now = Date.now();
+  const last = chatRateLimits.get(info.playerId) || 0;
+  if (now - last < 1000) return;
+  chatRateLimits.set(info.playerId, now);
+
+  const engine = engines.get(info.roomId);
+  if (!engine) return;
+
+  try {
+    const chatMsg = engine.sendChatMessage(info.playerId, data.message);
+    broadcastToRoom(info.roomId, 'chat:message', chatMsg);
+  } catch (e) {
+    send(ws, 'game:error', { message: (e as Error).message });
+  }
+}
+
+function handlePropThrow(ws: WebSocket, data: any): void {
+  const info = wsMap.get(ws);
+  if (!info) return;
+
+  // Rate limit: 1 prop per 2 seconds
+  const now = Date.now();
+  const last = propRateLimits.get(info.playerId) || 0;
+  if (now - last < 2000) return;
+  propRateLimits.set(info.playerId, now);
+
+  const engine = engines.get(info.roomId);
+  if (!engine) return;
+
+  const room = getRoom(info.roomId);
+  if (!room) return;
+
+  try {
+    engine.throwProp(info.playerId, data.targetId, data.propType);
+    const player = room.players.find(p => p.id === info.playerId);
+    broadcastToRoom(info.roomId, 'prop:thrown', {
+      fromId: info.playerId,
+      fromName: player?.name || '?',
+      targetId: data.targetId,
+      propType: data.propType,
+    });
+    // Update state to reflect remaining props
+    emitGameStates(info.roomId);
+  } catch (e) {
+    send(ws, 'game:error', { message: (e as Error).message });
+  }
 }

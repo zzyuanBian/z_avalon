@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PlayerView } from '@shared/types';
+import type { PlayerView, RoleConfig, PropType } from '@shared/types';
 import { getSocket, connectSocket } from '../socket';
 
 interface GameStore {
@@ -40,6 +40,9 @@ interface GameStore {
   assassinate: (targetId: string) => void;
   submitFunVote: (targetId: string) => void;
   playAgain: () => void;
+  setRoleConfig: (config: RoleConfig) => void;
+  sendChatMessage: (message: string) => void;
+  throwProp: (targetId: string, propType: PropType) => void;
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -186,5 +189,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   playAgain: () => {
     getSocket().send('game:play-again');
+  },
+
+  setRoleConfig: (config) => {
+    getSocket().send('game:set-role-config', { config });
+  },
+
+  sendChatMessage: (message) => {
+    getSocket().send('chat:send', { message });
+  },
+
+  throwProp: (targetId, propType) => {
+    getSocket().send('prop:throw', { targetId, propType });
   },
 }));

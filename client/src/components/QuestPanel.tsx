@@ -25,7 +25,21 @@ export default function QuestPanel() {
         </div>
       ) : hasDecidedQuest ? (
         <div className="text-center">
-          <div className="text-slate-400">等待其他队员做出决定...</div>
+          <div className="text-slate-400 mb-3">等待其他队员做出决定...</div>
+          <div className="space-y-1">
+            {view.proposedTeam.map(id => {
+              const p = view.players.find(pl => pl.id === id);
+              const decided = view.questDecidersSubmitted.includes(id);
+              return (
+                <div key={id} className="flex items-center justify-between text-xs px-3 py-1.5 rounded bg-nightLight/50">
+                  <span className="text-slate-300">{p?.name}</span>
+                  <span className={decided ? 'text-good-light' : 'text-slate-500'}>
+                    {decided ? '✓ 已决定' : '⏳ 思考中'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
       ) : isEvil ? (
         /* Evil players see both options */

@@ -1,4 +1,9 @@
-import type { Role } from './types';
+import type { Role, RoleConfig } from './types';
+
+export const ALL_GOOD_ROLES: Role[] = ['merlin', 'percival', 'loyal_servant'];
+export const ALL_EVIL_ROLES: Role[] = ['morgana', 'assassin', 'minion_of_mordred', 'oberon'];
+
+export const PROPS_LIMIT = { flower: 3, egg: 3 };
 
 export const ROLE_CONFIGS: Record<number, { good: Role[]; evil: Role[] }> = {
   5:  { good: ['merlin', 'percival', 'loyal_servant'],
@@ -71,3 +76,26 @@ export const ROLE_INFO: Record<Role, {
     description: '你是邪恶方，但其他邪恶队友也看不到你。独自潜伏！',
   },
 };
+
+export function validateRoleConfig(config: RoleConfig, playerCount: number): string | null {
+  const allRoles = [...config.good, ...config.evil];
+  if (allRoles.length !== playerCount) {
+    return `角色总数（${allRoles.length}）与玩家数（${playerCount}）不匹配`;
+  }
+  if (!config.good.includes('merlin')) return '必须包含梅林';
+  if (!config.evil.includes('assassin')) return '必须包含刺客';
+  const validRoles = [...ALL_GOOD_ROLES, ...ALL_EVIL_ROLES];
+  for (const r of allRoles) {
+    if (!validRoles.includes(r)) return `无效角色: ${r}`;
+  }
+  for (const r of config.good) {
+    if (ALL_EVIL_ROLES.includes(r)) return `角色 ${ROLE_INFO[r].name} 属于邪恶方`;
+  }
+  for (const r of config.evil) {
+    if (ALL_GOOD_ROLES.includes(r)) return `角色 ${ROLE_INFO[r].name} 属于善良方`;
+  }
+  if (config.good.length <= config.evil.length) {
+    return '善良方人数必须多于邪恶方';
+  }
+  return null;
+}

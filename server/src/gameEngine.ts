@@ -1,5 +1,5 @@
-import type { GameState, Player, RoleAssignment, Alignment, Role, MissionResult, LogEntry, KnownPlayers } from '../../shared/types.js';
-import { ROLE_CONFIGS, TEAM_SIZES, failsRequired, WINS_NEEDED, MAX_CONSECUTIVE_REJECTIONS } from '../../shared/constants.js';
+import type { GameState, Player, RoleAssignment, Alignment, Role, MissionResult, LogEntry, KnownPlayers, RoleConfig, ChatMessage, PropType } from '../../shared/types.js';
+import { ROLE_CONFIGS, TEAM_SIZES, failsRequired, WINS_NEEDED, MAX_CONSECUTIVE_REJECTIONS, validateRoleConfig, PROPS_LIMIT } from '../../shared/constants.js';
 import { shuffle } from './utils.js';
 
 export class GameEngine {
@@ -31,6 +31,9 @@ export class GameEngine {
       log: [],
       readyPlayers: [],
       createdAt: Date.now(),
+      customRoleConfig: null,
+      chatMessages: [],
+      propsUsed: {},
     };
   }
 
@@ -66,7 +69,7 @@ export class GameEngine {
 
   private assignRoles(): void {
     const playerCount = this.state.players.length;
-    const config = ROLE_CONFIGS[playerCount];
+    const config = this.state.customRoleConfig || ROLE_CONFIGS[playerCount];
     if (!config) throw new Error(`不支持${playerCount}人游戏`);
 
     const allRoles: Role[] = shuffle([...config.good, ...config.evil]);
@@ -460,6 +463,60 @@ export class GameEngine {
       `🤡 最愚玩家投票结果：${topName} 获得 ${topVotes} 票！`);
   }
 
+  setRoleConfig(playerId: string, config: RoleConfig): void {
+    if (this.state.phase !== 'lobby') {
+      throw new Error('只能在大厅阶段修改身份配置');
+    }
+    if (playerId !== this.state.hostId) {
+      throw new Error('只有房主可以修改身份配置');
+    }
+    const error = validateRoleConfig(config, this.state.players.length);
+    if (error) throw new Error(error);
+    this.state.customRoleConfig = { good: [...config.good], evil: [...config.evil] };
+  }
+
+  sendChatMessage(playerId: string, message: string): ChatMessage {
+    if (message.length < 1 || message.length > 200) {
+      throw new Error('消息长度须在1-200字符之间');
+    }
+    const player = this.state.players.find(p => p.id === playerId);
+    if (!player) throw new Error('玩家不存在');
+
+    const chatMsg: ChatMessage = {
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      playerId,
+      playerName: player.name,
+      message,
+      timestamp: Date.now(),
+    };
+    this.state.chatMessages.push(chatMsg);
+    // Cap at 100 messages
+    if (this.state.chatMessages.length > 100) {
+      this.state.chatMessages = this.state.chatMessages.slice(-100);
+    }
+    return chatMsg;
+  }
+
+  throwProp(playerId: string, targetId: string, propType: PropType): void {
+    if (this.state.phase === 'lobby') {
+      throw new Error('游戏尚未开始');
+    }
+    if (playerId === targetId) {
+      throw new Error('不能扔道具给自己');
+    }
+    const player = this.state.players.find(p => p.id === playerId);
+    const target = this.state.players.find(p => p.id === targetId);
+    if (!player || !target) throw new Error('玩家不存在');
+
+    if (!this.state.propsUsed[playerId]) {
+      this.state.propsUsed[playerId] = { flower: 0, egg: 0 };
+    }
+    if (this.state.propsUsed[playerId][propType] >= PROPS_LIMIT[propType]) {
+      throw new Error(`${propType === 'flower' ? '鲜花' : '鸡蛋'}次数已用完`);
+    }
+    this.state.propsUsed[playerId][propType]++;
+  }
+
   resetGame(): void {
     this.state.phase = 'lobby';
     this.state.roles = [];
@@ -478,5 +535,8 @@ export class GameEngine {
     this.state.assassinationTarget = null;
     this.state.log = [];
     this.state.readyPlayers = [];
+    this.state.customRoleConfig = null;
+    this.state.chatMessages = [];
+    this.state.propsUsed = {};
   }
 }

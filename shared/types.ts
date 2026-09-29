@@ -20,6 +20,28 @@ export type GamePhase =
   | 'assassination'
   | 'game_over';
 
+export interface RoleConfig {
+  good: Role[];
+  evil: Role[];
+}
+
+export interface ChatMessage {
+  id: string;
+  playerId: string;
+  playerName: string;
+  message: string;
+  timestamp: number;
+}
+
+export type PropType = 'flower' | 'egg';
+
+export interface PropEvent {
+  fromId: string;
+  fromName: string;
+  targetId: string;
+  propType: PropType;
+}
+
 export interface Player {
   id: string;
   name: string;
@@ -84,6 +106,9 @@ export interface GameState {
   log: LogEntry[];
   readyPlayers: string[];
   createdAt: number;
+  customRoleConfig: RoleConfig | null;
+  chatMessages: ChatMessage[];
+  propsUsed: Record<string, { flower: number; egg: number }>;
 }
 
 export interface PlayerView {
@@ -101,6 +126,8 @@ export interface PlayerView {
   proposedTeam: string[];
   teamSize: number;
   votesSubmitted: number;
+  votersSubmitted: string[];
+  questDecidersSubmitted: string[];
   totalPlayers: number;
   allVotesIn: boolean;
   voteResult?: { approveCount: number; rejectCount: number; approved: boolean };
@@ -117,6 +144,9 @@ export interface PlayerView {
   log: LogEntry[];
   hostId: string;
   readyCount: number;
+  roleConfig: RoleConfig;
+  chatMessages: ChatMessage[];
+  propsRemaining: { flower: number; egg: number };
 }
 
 export interface ClientToServerEvents {
@@ -131,6 +161,10 @@ export interface ClientToServerEvents {
   'game:quest-decide': (data: { success: boolean }) => void;
   'game:assassinate': (data: { target: string }) => void;
   'game:play-again': () => void;
+  'game:fun-vote': (data: { target: string }) => void;
+  'game:set-role-config': (data: { config: RoleConfig }) => void;
+  'chat:send': (data: { message: string }) => void;
+  'prop:throw': (data: { targetId: string; propType: PropType }) => void;
 }
 
 export interface ServerToClientEvents {
@@ -139,4 +173,6 @@ export interface ServerToClientEvents {
   'room:error': (data: { message: string }) => void;
   'game:state': (view: PlayerView) => void;
   'game:error': (data: { message: string }) => void;
+  'chat:message': (data: ChatMessage) => void;
+  'prop:thrown': (data: PropEvent) => void;
 }

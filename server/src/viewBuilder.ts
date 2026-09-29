@@ -1,4 +1,5 @@
 import type { GameState, PlayerView, RoleAssignment } from '../../shared/types.js';
+import { ROLE_CONFIGS, PROPS_LIMIT } from '../../shared/constants.js';
 
 export function buildPlayerView(state: GameState, playerId: string): PlayerView {
   const myRole = state.roles.find(r => r.playerId === playerId) || null;
@@ -23,6 +24,8 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     proposedTeam: [...state.proposedTeam],
     teamSize,
     votesSubmitted: Object.keys(state.votes).length,
+    votersSubmitted: Object.keys(state.votes),
+    questDecidersSubmitted: Object.keys(state.questDecisions),
     totalPlayers: state.players.length,
     allVotesIn: Object.keys(state.votes).length === state.players.length,
     voteHistory: state.voteHistory.map(v => ({ ...v })),
@@ -36,6 +39,15 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     log: state.log.map(l => ({ ...l })),
     hostId: state.hostId,
     readyCount: state.readyPlayers.length,
+    roleConfig: state.customRoleConfig || ROLE_CONFIGS[state.players.length] || { good: [], evil: [] },
+    chatMessages: state.chatMessages.slice(-50).map(m => ({ ...m })),
+    propsRemaining: (() => {
+      const used = state.propsUsed[playerId] || { flower: 0, egg: 0 };
+      return {
+        flower: PROPS_LIMIT.flower - used.flower,
+        egg: PROPS_LIMIT.egg - used.egg,
+      };
+    })(),
   };
 
   // Phase-specific data filtering

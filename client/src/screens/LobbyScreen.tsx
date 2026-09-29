@@ -3,6 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { useGameStore } from '../stores/gameStore';
 import RoomCode from '../components/RoomCode';
 import PlayerList from '../components/PlayerList';
+import RoleConfigurator from '../components/RoleConfigurator';
 
 export default function LobbyScreen() {
   const { view, playerId, startGame, leaveRoom, error } = useGameStore();
@@ -100,9 +101,12 @@ export default function LobbyScreen() {
       </p>
 
       {/* Player list */}
-      <div className="w-full max-w-sm mb-6">
+      <div className="w-full max-w-sm mb-4">
         <PlayerList players={view.players} leaderIndex={-1} proposedTeam={[]} knownPlayers={{}} totalPlayers={view.players.length} />
       </div>
+
+      {/* Role configuration (host only) */}
+      <RoleConfigurator />
 
       {/* Error */}
       {error && (
