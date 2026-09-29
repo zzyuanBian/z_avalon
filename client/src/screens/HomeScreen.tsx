@@ -103,11 +103,10 @@ export default function HomeScreen({ onHistory }: Props) {
           <div>
             <div className="text-slate-400 text-xs text-center mb-2">选择头像</div>
             {/* Selected preview */}
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex justify-center mb-2">
               <AvatarImage avatarId={selectedAvatar} size="lg" ring="ring-2 ring-gold" />
-              <span className="text-gold font-serif text-sm">{AVATARS[selectedAvatar].name}</span>
             </div>
-            <div className="grid grid-cols-8 gap-1.5 max-h-[80px] overflow-y-auto px-1">
+            <div className="grid grid-cols-8 gap-1.5 max-h-[80px] overflow-y-auto px-1 py-1">
               {AVATARS.map(av => (
                 <button
                   key={av.id}
@@ -156,11 +155,10 @@ export default function HomeScreen({ onHistory }: Props) {
           <div>
             <div className="text-slate-400 text-xs text-center mb-2">选择头像</div>
             {/* Selected preview */}
-            <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="flex justify-center mb-2">
               <AvatarImage avatarId={selectedAvatar} size="lg" ring="ring-2 ring-gold" />
-              <span className="text-gold font-serif text-sm">{AVATARS[selectedAvatar].name}</span>
             </div>
-            <div className="grid grid-cols-8 gap-1.5 max-h-[80px] overflow-y-auto px-1">
+            <div className="grid grid-cols-8 gap-1.5 max-h-[80px] overflow-y-auto px-1 py-1">
               {AVATARS.map(av => (
                 <button
                   key={av.id}
