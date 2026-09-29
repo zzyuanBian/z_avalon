@@ -43,12 +43,12 @@ export function joinRoom(roomId: string, playerName: string, avatar?: number): {
   if (!room) return { error: '房间不存在' };
   if (room.players.length >= 10) return { error: '房间已满（最多10人）' };
 
-  // Check if a disconnected player with same name exists (reconnection scenario)
+  // Check if a player with same name exists (reconnection / multi-device scenario)
   // This must happen BEFORE the game phase check, so players can rejoin mid-game
-  const disconnectedPlayer = room.players.find(p => p.name === playerName && !p.connected);
-  if (disconnectedPlayer) {
-    disconnectedPlayer.connected = true;
-    return { room, playerId: disconnectedPlayer.id };
+  const existingPlayer = room.players.find(p => p.name === playerName);
+  if (existingPlayer) {
+    existingPlayer.connected = true;
+    return { room, playerId: existingPlayer.id };
   }
 
   if (room.gameState && room.gameState.phase !== 'lobby') return { error: '游戏已经开始' };
