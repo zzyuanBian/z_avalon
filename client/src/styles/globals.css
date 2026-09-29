@@ -101,3 +101,28 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Round table glow */
+@keyframes table-glow {
+  0%, 100% {
+    box-shadow:
+      0 0 15px rgba(245, 158, 11, 0.15),
+      0 0 30px rgba(245, 158, 11, 0.08),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 25px rgba(245, 158, 11, 0.25),
+      0 0 50px rgba(245, 158, 11, 0.12),
+      inset 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+}
+
+.table-glow {
+  animation: table-glow 4s ease-in-out infinite;
+}
+
+/* Seat hover for prop buttons */
+.seat-group:hover .seat-props {
+  opacity: 1;
+}

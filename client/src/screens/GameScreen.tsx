@@ -1,7 +1,7 @@
 import { useGameStore } from '../stores/gameStore';
 import RoundTracker from '../components/RoundTracker';
 import VoteTracker from '../components/VoteTracker';
-import PlayerList from '../components/PlayerList';
+import RoundTable from '../components/RoundTable';
 import TeamSelector from '../components/TeamSelector';
 import VotePanel from '../components/VotePanel';
 import VoteReveal from '../components/VoteReveal';
@@ -36,35 +36,20 @@ export default function GameScreen() {
     }
   };
 
-  const getPhaseLabel = () => {
-    switch (view.phase) {
-      case 'team_selection': return '提名队伍';
-      case 'voting': return '投票阶段';
-      case 'vote_reveal': return '投票结果';
-      case 'quest': return '执行任务';
-      case 'quest_result': return '任务结果';
-      case 'assassination': return '刺杀阶段';
-      default: return '';
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col fade-in">
-      {/* Header */}
-      <div className="bg-nightLight border-b border-slate-700 px-4 py-3">
+      {/* Header - compact */}
+      <div className="bg-nightLight border-b border-slate-700 px-4 py-2">
         <div className="flex items-center justify-between max-w-lg mx-auto">
           <RoundTracker results={view.missionResults} currentRound={view.currentRound} playerCount={view.totalPlayers} />
-          <div className="text-center">
-            <div className="text-gold font-serif text-sm">{getPhaseLabel()}</div>
-            <div className="text-slate-400 text-xs">房间 {view.roomId}</div>
-          </div>
+          <div className="text-slate-500 text-xs font-mono">{view.roomId}</div>
           <VoteTracker count={view.consecutiveRejections} />
         </div>
       </div>
 
-      {/* Player list */}
-      <div className="px-4 py-3">
-        <PlayerList
+      {/* Round Table */}
+      <div className="px-2 py-1">
+        <RoundTable
           players={view.players}
           leaderIndex={view.leaderIndex}
           proposedTeam={view.proposedTeam}
@@ -74,7 +59,7 @@ export default function GameScreen() {
       </div>
 
       {/* Phase content */}
-      <div className="flex-1 px-4 py-3">
+      <div className="flex-1 px-4 py-2">
         <div className="max-w-lg mx-auto">
           {renderPhaseContent()}
         </div>
