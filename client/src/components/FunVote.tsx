@@ -10,7 +10,7 @@ export default function FunVote() {
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setFoolImg(prev => (prev % 3) + 1);
+      setFoolImg(prev => (prev % 4) + 1);
     }, 5000);
     return () => clearInterval(timer);
   }, []);
