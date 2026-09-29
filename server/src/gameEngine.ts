@@ -271,13 +271,18 @@ export class GameEngine {
 
     this.state.questDecisions[playerId] = success;
 
+    const decided = Object.keys(this.state.questDecisions).length;
+    const required = this.state.proposedTeam.length;
+    console.log(`[quest-decide] room=${this.state.roomId} player=${playerId.slice(0,8)} success=${success} decided=${decided}/${required} team=[${this.state.proposedTeam.map(id => id.slice(0,8)).join(',')}]`);
+
     // Check if all team members have decided
-    if (Object.keys(this.state.questDecisions).length === this.state.proposedTeam.length) {
+    if (decided >= required) {
       this.resolveQuest();
     }
   }
 
   private resolveQuest(): void {
+    console.log(`[resolveQuest] called, decisions:`, Object.keys(this.state.questDecisions).length, 'team:', this.state.proposedTeam.length);
     const failCount = Object.values(this.state.questDecisions).filter(v => !v).length;
     const successCount = this.state.proposedTeam.length - failCount;
     const requiredFails = failsRequired(this.state.players.length, this.state.currentRound);

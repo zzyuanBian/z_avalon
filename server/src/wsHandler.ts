@@ -372,6 +372,7 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
 
     // If all decisions in, start quest result display timer
     if (engine.state.phase === 'quest_result') {
+      console.log(`[quest] all decisions in, starting 5s result timer for ${info.roomId}`);
       questTimers.set(info.roomId, setTimeout(() => {
         engine.advanceAfterQuestResult();
         emitGameStates(info.roomId);
@@ -379,6 +380,7 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
       }, 5000));
     }
   } catch (e) {
+    console.error(`[quest-decide] error:`, (e as Error).message);
     send(ws, 'game:error', { message: (e as Error).message });
   }
 }
