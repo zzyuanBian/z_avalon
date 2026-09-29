@@ -20,7 +20,7 @@ export default function EndScreen() {
           : 'bg-gradient-to-b from-evil/30 to-evil/10 border-2 border-evil'
       }`}>
         <div className="text-5xl mb-3">
-          {isGoodWin ? '&#9812;' : '&#9760;'}
+          {isGoodWin ? '⚜' : '☠'}
         </div>
         <h1 className={`font-serif text-3xl font-bold mb-2 ${
           isGoodWin ? 'text-good-light' : 'text-evil-light'
