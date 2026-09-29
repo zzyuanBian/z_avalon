@@ -43,16 +43,15 @@ export default function RoundTable({ players, leaderIndex, proposedTeam, knownPl
     && (view.propsRemaining.flower > 0 || view.propsRemaining.egg > 0);
 
   // Calculate position for each player around the circle
-  // Current player (myIndex) is at the bottom (270° in CSS coords where 0°=top, clockwise)
+  // Current player (myIndex) is at the bottom (6 o'clock)
   const getPosition = (index: number) => {
     const relIndex = ((index - myIndex) + n) % n;
     const angleDeg = (relIndex * 360) / n;
     const angleRad = (angleDeg * Math.PI) / 180;
-    // radius as percentage of container (leaving room for card overflow)
     const r = 40;
     const x = 50 + r * Math.sin(angleRad);
-    const y = 50 - r * Math.cos(angleDeg === 180 ? Math.PI : angleRad);
-    return { x, y: 50 - r * Math.cos(angleRad) };
+    const y = 50 + r * Math.cos(angleRad); // +cos puts relIndex=0 at bottom
+    return { x, y };
   };
 
   // Voters/deciders status
