@@ -50,6 +50,7 @@ interface AvatarImageProps {
   avatarId: number;
   size?: 'sm' | 'md' | 'lg';
   ring?: string;
+  title?: string;
 }
 
 const SIZES = {
@@ -58,7 +59,7 @@ const SIZES = {
   lg: 'w-14 h-14',
 };
 
-export function AvatarImage({ avatarId, size = 'md', ring }: AvatarImageProps) {
+export function AvatarImage({ avatarId, size = 'md', ring, title }: AvatarImageProps) {
   const avatar = getAvatar(avatarId);
   const sizeClass = SIZES[size];
 
@@ -66,7 +67,7 @@ export function AvatarImage({ avatarId, size = 'md', ring }: AvatarImageProps) {
     <img
       src={`/avatars/avatar-${avatarId}.png`}
       alt={avatar.name}
-      title={avatar.name}
+      title={title}
       className={`rounded-full object-cover ${avatar.bgColor} ${sizeClass} ${ring || ''}`}
       draggable={false}
       loading="eager"
