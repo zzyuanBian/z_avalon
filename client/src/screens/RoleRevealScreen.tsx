@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import RoleCard from '../components/RoleCard';
+import { ROLE_INFO } from '@shared/constants';
 
 export default function RoleRevealScreen() {
   const { view, playerId, ready } = useGameStore();
@@ -43,6 +44,25 @@ export default function RoleRevealScreen() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* Role config */}
+      {flipped && (
+        <div className="card w-full max-w-sm mb-6 fade-in">
+          <h3 className="text-gold text-sm font-semibold mb-2">本局角色配置：</h3>
+          <div className="flex flex-wrap gap-1.5">
+            {view.roleConfig.good.map((role, i) => (
+              <span key={`g${i}`} className="text-xs px-2 py-0.5 rounded bg-good/20 text-good-light">
+                {ROLE_INFO[role]?.name || role}
+              </span>
+            ))}
+            {view.roleConfig.evil.map((role, i) => (
+              <span key={`e${i}`} className="text-xs px-2 py-0.5 rounded bg-evil/20 text-evil-light">
+                {ROLE_INFO[role]?.name || role}
+              </span>
+            ))}
           </div>
         </div>
       )}
