@@ -25,6 +25,7 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     votesSubmitted: Object.keys(state.votes).length,
     totalPlayers: state.players.length,
     allVotesIn: Object.keys(state.votes).length === state.players.length,
+    voteHistory: state.voteHistory.map(v => ({ ...v })),
     winner: state.winner,
     winReason: state.winReason,
     isLeader,
@@ -38,15 +39,17 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
   // Phase-specific data filtering
   switch (state.phase) {
     case 'voting':
-      // Don't reveal vote contents until all are in
       view.canAct = state.votes[playerId] === undefined;
       break;
 
-    case 'vote_reveal':
-      // All votes in, show them
-      view.votes = { ...state.votes };
+    case 'vote_reveal': {
+      // Anonymous: only show aggregate counts
+      const approveCount = Object.values(state.votes).filter(v => v).length;
+      const rejectCount = state.players.length - approveCount;
+      view.voteResult = { approveCount, rejectCount, approved: approveCount > rejectCount };
       view.canAct = false;
       break;
+    }
 
     case 'quest':
       view.canAct = isOnTeam && state.questDecisions[playerId] === undefined;
@@ -58,6 +61,8 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
         view.questResult = {
           success: lastResult.success,
           failCount: lastResult.failCount,
+          successCount: lastResult.successCount,
+          teamSize: lastResult.team.length,
         };
       }
       view.canAct = false;

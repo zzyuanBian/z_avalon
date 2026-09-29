@@ -3,71 +3,64 @@ import { useGameStore } from '../stores/gameStore';
 
 export default function VoteReveal() {
   const { view } = useGameStore();
-  const [revealCount, setRevealCount] = useState(0);
+  const [countdown, setCountdown] = useState(5);
 
-  if (!view || !view.votes) return null;
+  if (!view || !view.voteResult) return null;
 
-  const entries = Object.entries(view.votes);
-  const totalVotes = entries.length;
-  const approveCount = entries.filter(([, v]) => v).length;
-  const rejectCount = totalVotes - approveCount;
-  const approved = approveCount > rejectCount;
+  const { approveCount, rejectCount, approved } = view.voteResult;
 
-  // Staggered reveal animation
+  // Countdown timer
   useEffect(() => {
-    if (revealCount < totalVotes) {
-      const timer = setTimeout(() => setRevealCount(c => c + 1), 300);
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
       return () => clearTimeout(timer);
     }
-  }, [revealCount, totalVotes]);
+  }, [countdown]);
 
   return (
-    <div className="fade-in text-center">
+    <div className="fade-in text-center py-4">
       <h2 className="font-serif text-xl text-gold mb-4">投票结果</h2>
 
-      {/* Vote cards flipping one by one */}
-      <div className="grid grid-cols-5 gap-2 mb-6 max-w-xs mx-auto">
-        {entries.map(([playerId, vote], i) => {
-          const player = view.players.find(p => p.id === playerId);
-          const revealed = i < revealCount;
-          return (
-            <div
-              key={playerId}
-              className={`text-center ${revealed ? 'vote-flip' : 'opacity-30'}`}
-            >
-              <div className={`w-10 h-12 rounded-lg flex items-center justify-center text-lg font-bold mx-auto mb-1 ${
-                !revealed ? 'bg-slate-700' :
-                vote ? 'bg-good text-white' : 'bg-evil text-white'
-              }`}>
-                {revealed ? (vote ? '✓' : '✗') : '?'}
-              </div>
-              <span className="text-[10px] text-slate-400 truncate block">
-                {player?.name?.slice(0, 4)}
-              </span>
-            </div>
-          );
-        })}
+      {/* Anonymous vote tally */}
+      <div className="flex items-center justify-center gap-8 mb-6">
+        <div className="text-center">
+          <div className="text-good text-5xl font-bold burst-in">{approveCount}</div>
+          <div className="text-slate-400 text-sm mt-1">同意</div>
+        </div>
+        <div className="text-slate-600 text-2xl">:</div>
+        <div className="text-center">
+          <div className="text-evil text-5xl font-bold burst-in">{rejectCount}</div>
+          <div className="text-slate-400 text-sm mt-1">拒绝</div>
+        </div>
       </div>
 
-      {/* Tally */}
-      {revealCount === totalVotes && (
-        <div className="fade-in">
-          <div className="flex items-center justify-center gap-6 mb-3">
-            <div className="text-center">
-              <div className="text-good text-3xl font-bold">{approveCount}</div>
-              <div className="text-slate-400 text-xs">同意</div>
-            </div>
-            <div className="text-slate-600 text-xl">:</div>
-            <div className="text-center">
-              <div className="text-evil text-3xl font-bold">{rejectCount}</div>
-              <div className="text-slate-400 text-xs">拒绝</div>
-            </div>
+      <p className={`text-lg font-semibold mb-4 ${approved ? 'text-good-light' : 'text-evil-light'}`}>
+        {approved ? '✓ 队伍通过！' : '✗ 队伍被拒绝！'}
+      </p>
+
+      {/* Vote history */}
+      {view.voteHistory.length > 1 && (
+        <div className="mt-4">
+          <p className="text-slate-500 text-xs mb-2">历史投票</p>
+          <div className="flex justify-center gap-2">
+            {view.voteHistory.map((v, i) => (
+              <div
+                key={i}
+                className={`text-xs px-2 py-1 rounded ${
+                  v.approved ? 'bg-good/20 text-good' : 'bg-evil/20 text-evil'
+                }`}
+              >
+                第{i + 1}次 {v.approveCount}:{v.rejectCount}
+              </div>
+            ))}
           </div>
-          <p className={`text-lg font-semibold ${approved ? 'text-good-light' : 'text-evil-light'}`}>
-            {approved ? '✓ 队伍通过！' : '✗ 队伍被拒绝！'}
-          </p>
         </div>
       )}
+
+      {/* Countdown */}
+      <p className="text-slate-500 text-xs mt-4">
+        {countdown > 0 ? `${countdown} 秒后继续...` : '即将继续...'}
+      </p>
     </div>
   );
 }

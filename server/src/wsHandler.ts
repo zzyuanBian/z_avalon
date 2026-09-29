@@ -7,6 +7,7 @@ import { saveGameStart, saveGameEnd } from './database.js';
 
 const engines = new Map<string, GameEngine>();
 const voteTimers = new Map<string, ReturnType<typeof setTimeout>>();
+const questTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
 // Map WebSocket -> { roomId, playerId }
 const wsMap = new Map<WebSocket, { roomId: string; playerId: string }>();
@@ -368,6 +369,15 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
   try {
     engine.submitQuestDecision(info.playerId, data.success);
     emitGameStates(info.roomId);
+
+    // If all decisions in, start quest result display timer
+    if (engine.state.phase === 'quest_result') {
+      questTimers.set(info.roomId, setTimeout(() => {
+        engine.advanceAfterQuestResult();
+        emitGameStates(info.roomId);
+        questTimers.delete(info.roomId);
+      }, 5000));
+    }
   } catch (e) {
     send(ws, 'game:error', { message: (e as Error).message });
   }
@@ -404,6 +414,10 @@ function handlePlayAgain(ws: WebSocket): void {
   if (voteTimers.has(info.roomId)) {
     clearTimeout(voteTimers.get(info.roomId)!);
     voteTimers.delete(info.roomId);
+  }
+  if (questTimers.has(info.roomId)) {
+    clearTimeout(questTimers.get(info.roomId)!);
+    questTimers.delete(info.roomId);
   }
 
   const engine = engines.get(info.roomId);

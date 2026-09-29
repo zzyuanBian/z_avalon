@@ -41,8 +41,15 @@ export interface MissionResult {
   round: number;
   success: boolean;
   failCount: number;
+  successCount: number;
   team: string[];
   leader: string;
+}
+
+export interface VoteRecord {
+  approveCount: number;
+  rejectCount: number;
+  approved: boolean;
 }
 
 export interface LogEntry {
@@ -66,6 +73,7 @@ export interface GameState {
   consecutiveRejections: number;
   proposedTeam: string[];
   votes: { [playerId: string]: boolean };
+  voteHistory: VoteRecord[];
   questDecisions: { [playerId: string]: boolean };
   winner: Alignment | null;
   winReason: string | null;
@@ -93,8 +101,9 @@ export interface PlayerView {
   votesSubmitted: number;
   totalPlayers: number;
   allVotesIn: boolean;
-  votes?: { [playerId: string]: boolean };
-  questResult?: { success: boolean; failCount: number };
+  voteResult?: { approveCount: number; rejectCount: number; approved: boolean };
+  voteHistory: VoteRecord[];
+  questResult?: { success: boolean; failCount: number; successCount: number; teamSize: number };
   winner: Alignment | null;
   winReason: string | null;
   allRoles?: RoleAssignment[];

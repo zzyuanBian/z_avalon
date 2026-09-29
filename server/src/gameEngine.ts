@@ -20,6 +20,7 @@ export class GameEngine {
       consecutiveRejections: 0,
       proposedTeam: [],
       votes: {},
+      voteHistory: [],
       questDecisions: {},
       winner: null,
       winReason: null,
@@ -210,6 +211,12 @@ export class GameEngine {
     const rejectCount = this.state.players.length - approveCount;
     const approved = approveCount > rejectCount;
 
+    // Record vote history
+    this.state.voteHistory.push({ approveCount, rejectCount, approved });
+
+    // Clear votes for anonymity (no per-player tracking)
+    this.state.votes = {};
+
     if (approved) {
       this.state.consecutiveRejections = 0;
       this.state.questDecisions = {};
@@ -272,6 +279,7 @@ export class GameEngine {
 
   private resolveQuest(): void {
     const failCount = Object.values(this.state.questDecisions).filter(v => !v).length;
+    const successCount = this.state.proposedTeam.length - failCount;
     const requiredFails = failsRequired(this.state.players.length, this.state.currentRound);
     const success = failCount < requiredFails;
 
@@ -280,11 +288,14 @@ export class GameEngine {
       round: this.state.currentRound,
       success,
       failCount,
+      successCount,
       team: [...this.state.proposedTeam],
       leader: leader.id,
     };
 
     this.state.missionResults.push(result);
+    // Clear quest decisions for anonymity
+    this.state.questDecisions = {};
     this.state.phase = 'quest_result';
 
     const goodWins = this.state.missionResults.filter(r => r.success).length;
@@ -292,11 +303,17 @@ export class GameEngine {
 
     this.addLog('quest_result',
       `第${this.state.currentRound}轮任务${success ? '成功' : '失败'}！` +
-      `${failCount} 个失败。当前：${goodWins} 成功 / ${evilWins} 失败`);
+      `${successCount} 成功 / ${failCount} 失败。当前：${goodWins} 成功 / ${evilWins} 失败`);
+  }
+
+  advanceAfterQuestResult(): void {
+    if (this.state.phase !== 'quest_result') return;
+
+    const goodWins = this.state.missionResults.filter(r => r.success).length;
+    const evilWins = this.state.missionResults.filter(r => !r.success).length;
 
     // Check win conditions
     if (goodWins >= WINS_NEEDED) {
-      // Check if assassin exists for assassination phase
       const hasAssassin = this.state.roles.some(r => r.role === 'assassin');
       if (hasAssassin) {
         this.state.phase = 'assassination';
