@@ -38,6 +38,14 @@ export function randomAvatarId(): number {
   return Math.floor(Math.random() * AVATARS.length);
 }
 
+// Preload all avatar images to avoid flash on render
+export function preloadAvatars(): void {
+  AVATARS.forEach(av => {
+    const img = new Image();
+    img.src = `/avatars/avatar-${av.id}.png`;
+  });
+}
+
 interface AvatarImageProps {
   avatarId: number;
   size?: 'sm' | 'md' | 'lg';
@@ -59,8 +67,10 @@ export function AvatarImage({ avatarId, size = 'md', ring }: AvatarImageProps) {
       src={`/avatars/avatar-${avatarId}.png`}
       alt={avatar.name}
       title={avatar.name}
-      className={`rounded-full object-cover ${sizeClass} ${ring || ''}`}
+      className={`rounded-full object-cover ${avatar.bgColor} ${sizeClass} ${ring || ''}`}
       draggable={false}
+      loading="eager"
+      decoding="async"
     />
   );
 }

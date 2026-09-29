@@ -8,12 +8,14 @@ import GameScreen from './screens/GameScreen';
 import EndScreen from './screens/EndScreen';
 import HistoryScreen from './screens/HistoryScreen';
 import ChatPanel from './components/ChatPanel';
+import { preloadAvatars } from './components/Avatars';
 
 function App() {
   const { view, playerName, setPlayerInfo, setConnected, updateView, setError, reconnect } = useGameStore();
   const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
+    preloadAvatars();
     const socket = connectSocket();
 
     const onConnect = () => {
