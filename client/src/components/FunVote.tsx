@@ -33,7 +33,7 @@ export default function FunVote() {
       <div className="bg-nightLight rounded-xl border border-gold/30 p-4">
         <h3 className="font-serif text-gold text-center text-lg mb-1">🤡 最愚玩家投票</h3>
         <p className="text-slate-400 text-xs text-center mb-3">
-          选出本局最菜的那位队友！
+          选出本局最愚的那位选手！
         </p>
 
         {/* Voting UI */}
