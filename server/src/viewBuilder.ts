@@ -28,6 +28,8 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     voteHistory: state.voteHistory.map(v => ({ ...v })),
     winner: state.winner,
     winReason: state.winReason,
+    funVotesSubmitted: Object.keys(state.funVotes).length,
+    funVoteResult: null,
     isLeader,
     isOnTeam,
     canAct: false,
@@ -80,7 +82,11 @@ export function buildPlayerView(state: GameState, playerId: string): PlayerView 
     case 'game_over':
       // Reveal all roles
       view.allRoles = state.roles.map(r => ({ ...r }));
-      view.canAct = false;
+      view.funVotesSubmitted = Object.keys(state.funVotes).length;
+      view.funVoteResult = state.funVoteResult
+        ? state.funVoteResult.map(r => ({ ...r }))
+        : null;
+      view.canAct = state.funVotes[playerId] === undefined;
       break;
 
     case 'role_reveal':

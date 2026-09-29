@@ -141,6 +141,7 @@ function handleMessage(ws: WebSocket, msg: WsMessage): void {
     case 'game:vote': handleVote(ws, data); break;
     case 'game:quest-decide': handleQuestDecide(ws, data); break;
     case 'game:assassinate': handleAssassinate(ws, data); break;
+    case 'game:fun-vote': handleFunVote(ws, data); break;
     case 'game:play-again': handlePlayAgain(ws); break;
     default:
       send(ws, 'error', { message: `未知消息类型: ${type}` });
@@ -410,6 +411,21 @@ function handleAssassinate(ws: WebSocket, data: any): void {
 
   try {
     engine.assassinate(info.playerId, data.target);
+    emitGameStates(info.roomId);
+  } catch (e) {
+    send(ws, 'game:error', { message: (e as Error).message });
+  }
+}
+
+function handleFunVote(ws: WebSocket, data: any): void {
+  const info = wsMap.get(ws);
+  if (!info) return;
+
+  const engine = engines.get(info.roomId);
+  if (!engine) return;
+
+  try {
+    engine.submitFunVote(info.playerId, data.target);
     emitGameStates(info.roomId);
   } catch (e) {
     send(ws, 'game:error', { message: (e as Error).message });

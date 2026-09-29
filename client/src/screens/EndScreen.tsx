@@ -1,5 +1,6 @@
 import { useGameStore } from '../stores/gameStore';
 import { ROLE_INFO } from '@shared/constants';
+import FunVote from '../components/FunVote';
 
 export default function EndScreen() {
   const { view, playerId, playAgain, leaveRoom } = useGameStore();
@@ -81,6 +82,9 @@ export default function EndScreen() {
           })}
         </div>
       </div>
+
+      {/* Fun vote */}
+      <FunVote />
 
       {/* Actions */}
       <div className="w-full max-w-sm space-y-3 mt-auto">

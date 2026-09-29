@@ -22,6 +22,8 @@ export class GameEngine {
       votes: {},
       voteHistory: [],
       questDecisions: {},
+      funVotes: {},
+      funVoteResult: null,
       winner: null,
       winReason: null,
       assassinationTarget: null,
@@ -412,6 +414,52 @@ export class GameEngine {
     });
   }
 
+  submitFunVote(playerId: string, targetId: string): void {
+    if (this.state.phase !== 'game_over') {
+      throw new Error('当前不是游戏结束阶段');
+    }
+    // Can't vote for yourself
+    if (playerId === targetId) {
+      throw new Error('不能投给自己');
+    }
+    // Idempotent: already voted
+    if (this.state.funVotes[playerId] !== undefined) {
+      return;
+    }
+    // Validate target
+    if (!this.state.players.find(p => p.id === targetId)) {
+      throw new Error('目标玩家不存在');
+    }
+
+    this.state.funVotes[playerId] = targetId;
+
+    // Check if all players have voted
+    if (Object.keys(this.state.funVotes).length >= this.state.players.length) {
+      this.resolveFunVote();
+    }
+  }
+
+  private resolveFunVote(): void {
+    // Tally votes
+    const tally: Record<string, number> = {};
+    for (const targetId of Object.values(this.state.funVotes)) {
+      tally[targetId] = (tally[targetId] || 0) + 1;
+    }
+
+    // Sort by vote count descending
+    const result = Object.entries(tally)
+      .map(([playerId, voteCount]) => ({ playerId, voteCount }))
+      .sort((a, b) => b.voteCount - a.voteCount);
+
+    this.state.funVoteResult = result;
+
+    const topPlayer = this.state.players.find(p => p.id === result[0]?.playerId);
+    const topName = topPlayer?.name || '?';
+    const topVotes = result[0]?.voteCount || 0;
+    this.addLog('game_over',
+      `🤡 最愚玩家投票结果：${topName} 获得 ${topVotes} 票！`);
+  }
+
   resetGame(): void {
     this.state.phase = 'lobby';
     this.state.roles = [];
@@ -423,6 +471,8 @@ export class GameEngine {
     this.state.proposedTeam = [];
     this.state.votes = {};
     this.state.questDecisions = {};
+    this.state.funVotes = {};
+    this.state.funVoteResult = null;
     this.state.winner = null;
     this.state.winReason = null;
     this.state.assassinationTarget = null;

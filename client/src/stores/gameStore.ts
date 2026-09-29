@@ -38,6 +38,7 @@ interface GameStore {
   submitVote: (approve: boolean) => void;
   submitQuestDecision: (success: boolean) => void;
   assassinate: (targetId: string) => void;
+  submitFunVote: (targetId: string) => void;
   playAgain: () => void;
 }
 
@@ -177,6 +178,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   assassinate: (targetId) => {
     getSocket().send('game:assassinate', { target: targetId });
+  },
+
+  submitFunVote: (targetId) => {
+    getSocket().send('game:fun-vote', { target: targetId });
   },
 
   playAgain: () => {

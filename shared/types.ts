@@ -75,6 +75,8 @@ export interface GameState {
   votes: { [playerId: string]: boolean };
   voteHistory: VoteRecord[];
   questDecisions: { [playerId: string]: boolean };
+  funVotes: { [playerId: string]: string }; // voterId → targetId
+  funVoteResult: { playerId: string; voteCount: number }[] | null;
   winner: Alignment | null;
   winReason: string | null;
   assassinationTarget: string | null;
@@ -106,6 +108,8 @@ export interface PlayerView {
   questResult?: { success: boolean; failCount: number; successCount: number; teamSize: number };
   winner: Alignment | null;
   winReason: string | null;
+  funVotesSubmitted: number;
+  funVoteResult: { playerId: string; voteCount: number }[] | null;
   allRoles?: RoleAssignment[];
   isLeader: boolean;
   isOnTeam: boolean;
