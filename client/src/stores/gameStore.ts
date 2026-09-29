@@ -17,12 +17,14 @@ interface GameStore {
   hasVoted: boolean;
   hasDecidedQuest: boolean;
   error: string | null;
+  playerMarks: Record<string, string[]>; // playerId → array of mark labels
 
   // Actions
   setPlayerInfo: (playerId: string, playerName: string, roomId: string) => void;
   setConnected: (connected: boolean) => void;
   updateView: (view: PlayerView) => void;
   setError: (error: string | null) => void;
+  togglePlayerMark: (playerId: string, mark: string) => void;
 
   // Game actions
   createRoom: (playerName: string, roomName?: string) => void;
@@ -49,6 +51,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   hasVoted: false,
   hasDecidedQuest: false,
   error: null,
+  playerMarks: {},
 
   setPlayerInfo: (playerId, playerName, roomId) => {
     set({ playerId, playerName, roomId });
@@ -78,6 +81,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   setError: (error) => set({ error }),
+
+  togglePlayerMark: (playerId, mark) => {
+    const { playerMarks } = get();
+    const current = playerMarks[playerId] || [];
+    const updated = current.includes(mark)
+      ? current.filter(m => m !== mark)
+      : [...current, mark];
+    set({
+      playerMarks: {
+        ...playerMarks,
+        [playerId]: updated,
+      },
+    });
+  },
 
   createRoom: (playerName, roomName) => {
     const socket = connectSocket();

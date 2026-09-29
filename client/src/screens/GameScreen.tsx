@@ -52,7 +52,7 @@ export default function GameScreen() {
       {/* Header */}
       <div className="bg-nightLight border-b border-slate-700 px-4 py-3">
         <div className="flex items-center justify-between max-w-lg mx-auto">
-          <RoundTracker results={view.missionResults} currentRound={view.currentRound} />
+          <RoundTracker results={view.missionResults} currentRound={view.currentRound} playerCount={view.totalPlayers} />
           <div className="text-center">
             <div className="text-gold font-serif text-sm">{getPhaseLabel()}</div>
             <div className="text-slate-400 text-xs">房间 {view.roomId}</div>
