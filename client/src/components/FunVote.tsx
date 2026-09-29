@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useGameStore } from '../stores/gameStore';
+import { ROLE_INFO } from '@shared/constants';
 
 export default function FunVote() {
   const { view, playerId, submitFunVote } = useGameStore();
@@ -22,6 +23,10 @@ export default function FunVote() {
 
   const topVoted = result?.[0];
   const topPlayer = topVoted ? view.players.find(p => p.id === topVoted.playerId) : null;
+  const getRole = (pid: string) => {
+    const r = view.allRoles?.find(ar => ar.playerId === pid);
+    return r ? ROLE_INFO[r.role] : null;
+  };
 
   return (
     <div className="w-full max-w-sm mb-6">
@@ -83,6 +88,18 @@ export default function FunVote() {
             />
             <div className="text-gold font-serif text-lg font-bold">
               {topPlayer.name}
+              {(() => {
+                const role = getRole(topPlayer.id);
+                return role ? (
+                  <span className={`ml-1.5 text-xs font-normal px-1.5 py-0.5 rounded ${
+                    role.alignment === 'good'
+                      ? 'bg-good/20 text-good-light'
+                      : 'bg-evil/20 text-evil-light'
+                  }`}>
+                    {role.name}
+                  </span>
+                ) : null;
+              })()}
             </div>
             <div className="text-slate-400 text-sm">
               荣获本局最愚称号！获得 <span className="text-evil-light font-bold">{topVoted!.voteCount}</span> 票
@@ -93,10 +110,20 @@ export default function FunVote() {
               <div className="mt-3 space-y-1">
                 {result.slice(0, 5).map((r, i) => {
                   const p = view.players.find(pl => pl.id === r.playerId);
+                  const role = getRole(r.playerId);
                   return (
                     <div key={r.playerId} className="flex items-center justify-between text-xs px-2 py-1">
                       <span className={i === 0 ? 'text-gold font-semibold' : 'text-slate-400'}>
                         {i === 0 ? '🤡' : `${i + 1}.`} {p?.name || '?'}
+                        {role && (
+                          <span className={`ml-1 text-[10px] font-normal px-1 py-0.5 rounded ${
+                            role.alignment === 'good'
+                              ? 'bg-good/20 text-good-light'
+                              : 'bg-evil/20 text-evil-light'
+                          }`}>
+                            {role.name}
+                          </span>
+                        )}
                       </span>
                       <span className={i === 0 ? 'text-evil-light font-bold' : 'text-slate-500'}>
                         {r.voteCount} 票
