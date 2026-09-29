@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useGameStore } from '../stores/gameStore';
+import { AVATARS, AvatarImage, randomAvatarId } from '../components/Avatars';
 
 interface Props {
   onHistory?: () => void;
@@ -10,6 +11,7 @@ export default function HomeScreen({ onHistory }: Props) {
   const [playerName, setPlayerName] = useState('');
   const [roomName, setRoomName] = useState('');
   const [roomId, setRoomId] = useState('');
+  const [selectedAvatar, setSelectedAvatar] = useState(() => randomAvatarId());
   const { createRoom, joinRoom, error, setError } = useGameStore();
 
   // Check for room code in URL (from QR scan)
@@ -29,7 +31,8 @@ export default function HomeScreen({ onHistory }: Props) {
       setError('请输入昵称');
       return;
     }
-    createRoom(playerName.trim(), roomName.trim());
+    try { sessionStorage.setItem('avalon_avatar', String(selectedAvatar)); } catch {}
+    createRoom(playerName.trim(), roomName.trim(), selectedAvatar);
   };
 
   const handleJoin = () => {
@@ -41,7 +44,8 @@ export default function HomeScreen({ onHistory }: Props) {
       setError('请输入房间码');
       return;
     }
-    joinRoom(roomId.trim().toUpperCase(), playerName.trim());
+    try { sessionStorage.setItem('avalon_avatar', String(selectedAvatar)); } catch {}
+    joinRoom(roomId.trim().toUpperCase(), playerName.trim(), selectedAvatar);
   };
 
   return (
@@ -95,6 +99,31 @@ export default function HomeScreen({ onHistory }: Props) {
             maxLength={20}
             autoFocus
           />
+          {/* Avatar picker */}
+          <div>
+            <div className="text-slate-400 text-xs text-center mb-2">选择头像</div>
+            <div className="grid grid-cols-8 gap-1.5 max-h-[120px] overflow-y-auto px-1">
+              {AVATARS.map(av => (
+                <button
+                  key={av.id}
+                  onClick={() => setSelectedAvatar(av.id)}
+                  className={`flex flex-col items-center transition-all ${
+                    selectedAvatar === av.id ? 'scale-110' : 'opacity-70 hover:opacity-100'
+                  }`}
+                  title={av.name}
+                >
+                  <AvatarImage
+                    avatarId={av.id}
+                    size="sm"
+                    ring={selectedAvatar === av.id ? 'ring-2 ring-gold' : ''}
+                  />
+                  <span className={`text-[8px] mt-0.5 truncate w-full text-center ${
+                    selectedAvatar === av.id ? 'text-gold' : 'text-slate-500'
+                  }`}>{av.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <button className="btn-primary w-full" onClick={handleCreate}>
             创建
           </button>
@@ -121,6 +150,31 @@ export default function HomeScreen({ onHistory }: Props) {
             maxLength={20}
             autoFocus
           />
+          {/* Avatar picker */}
+          <div>
+            <div className="text-slate-400 text-xs text-center mb-2">选择头像</div>
+            <div className="grid grid-cols-8 gap-1.5 max-h-[120px] overflow-y-auto px-1">
+              {AVATARS.map(av => (
+                <button
+                  key={av.id}
+                  onClick={() => setSelectedAvatar(av.id)}
+                  className={`flex flex-col items-center transition-all ${
+                    selectedAvatar === av.id ? 'scale-110' : 'opacity-70 hover:opacity-100'
+                  }`}
+                  title={av.name}
+                >
+                  <AvatarImage
+                    avatarId={av.id}
+                    size="sm"
+                    ring={selectedAvatar === av.id ? 'ring-2 ring-gold' : ''}
+                  />
+                  <span className={`text-[8px] mt-0.5 truncate w-full text-center ${
+                    selectedAvatar === av.id ? 'text-gold' : 'text-slate-500'
+                  }`}>{av.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <input
             className="input-field text-center text-2xl tracking-[0.3em] font-mono uppercase"
             placeholder="房间码"

@@ -29,12 +29,14 @@ function App() {
 
     const onDisconnect = () => setConnected(false);
     const onRoomCreated = (data: any) => {
-      const name = useGameStore.getState().playerName || '';
-      setPlayerInfo(data.playerId, name, data.roomId);
+      const state = useGameStore.getState();
+      const avatar = parseInt(sessionStorage.getItem('avalon_avatar') || '0', 10);
+      setPlayerInfo(data.playerId, state.playerName || '', data.roomId, avatar);
     };
     const onRoomJoined = (data: any) => {
       const state = useGameStore.getState();
-      setPlayerInfo(data.playerId, state.playerName || '', state.roomId || '');
+      const avatar = parseInt(sessionStorage.getItem('avalon_avatar') || '0', 10);
+      setPlayerInfo(data.playerId, state.playerName || '', state.roomId || '', avatar);
     };
     const onRoomError = (data: any) => {
       setError(data.message);
@@ -45,6 +47,7 @@ function App() {
           sessionStorage.removeItem('avalon_playerId');
           sessionStorage.removeItem('avalon_playerName');
           sessionStorage.removeItem('avalon_roomId');
+          sessionStorage.removeItem('avalon_avatar');
         }
       } catch {}
     };

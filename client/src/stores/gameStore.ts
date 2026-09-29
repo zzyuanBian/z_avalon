@@ -20,15 +20,15 @@ interface GameStore {
   playerMarks: Record<string, string[]>; // playerId → array of mark labels
 
   // Actions
-  setPlayerInfo: (playerId: string, playerName: string, roomId: string) => void;
+  setPlayerInfo: (playerId: string, playerName: string, roomId: string, avatar: number) => void;
   setConnected: (connected: boolean) => void;
   updateView: (view: PlayerView) => void;
   setError: (error: string | null) => void;
   togglePlayerMark: (playerId: string, mark: string) => void;
 
   // Game actions
-  createRoom: (playerName: string, roomName?: string) => void;
-  joinRoom: (roomId: string, playerName: string) => void;
+  createRoom: (playerName: string, roomName?: string, avatar?: number) => void;
+  joinRoom: (roomId: string, playerName: string, avatar?: number) => void;
   leaveRoom: () => void;
   reconnect: (roomId: string, playerId: string) => void;
   startGame: () => void;
@@ -57,13 +57,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
   error: null,
   playerMarks: {},
 
-  setPlayerInfo: (playerId, playerName, roomId) => {
+  setPlayerInfo: (playerId, playerName, roomId, avatar) => {
     set({ playerId, playerName, roomId });
     // Save for reconnection
     try {
       sessionStorage.setItem('avalon_playerId', playerId);
       sessionStorage.setItem('avalon_playerName', playerName);
       sessionStorage.setItem('avalon_roomId', roomId);
+      sessionStorage.setItem('avalon_avatar', String(avatar));
     } catch {}
   },
 
@@ -100,28 +101,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
-  createRoom: (playerName, roomName) => {
+  createRoom: (playerName, roomName, avatar) => {
     const socket = connectSocket();
     set({ connected: true, playerName });
     // Wait for connection if not connected
     if (!socket.connected) {
       socket.once('connect', () => {
-        socket.send('room:create', { playerName, roomName: roomName || '' });
+        socket.send('room:create', { playerName, roomName: roomName || '', avatar: avatar ?? 0 });
       });
     } else {
-      socket.send('room:create', { playerName, roomName: roomName || '' });
+      socket.send('room:create', { playerName, roomName: roomName || '', avatar: avatar ?? 0 });
     }
   },
 
-  joinRoom: (roomId, playerName) => {
+  joinRoom: (roomId, playerName, avatar) => {
     const socket = connectSocket();
     set({ connected: true, playerName, roomId });
     if (!socket.connected) {
       socket.once('connect', () => {
-        socket.send('room:join', { roomId, playerName });
+        socket.send('room:join', { roomId, playerName, avatar: avatar ?? 0 });
       });
     } else {
-      socket.send('room:join', { roomId, playerName });
+      socket.send('room:join', { roomId, playerName, avatar: avatar ?? 0 });
     }
   },
 
@@ -133,6 +134,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sessionStorage.removeItem('avalon_playerId');
       sessionStorage.removeItem('avalon_playerName');
       sessionStorage.removeItem('avalon_roomId');
+      sessionStorage.removeItem('avalon_avatar');
     } catch {}
   },
 

@@ -1,6 +1,7 @@
 import { useGameStore } from '../stores/gameStore';
 import { ROLE_INFO } from '@shared/constants';
 import FunVote from '../components/FunVote';
+import { AvatarImage } from '../components/Avatars';
 
 export default function EndScreen() {
   const { view, playerId, playAgain, leaveRoom } = useGameStore();
@@ -62,11 +63,7 @@ export default function EndScreen() {
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                    role.alignment === 'good' ? 'bg-good/20 text-good-light' : 'bg-evil/20 text-evil-light'
-                  }`}>
-                    {player?.name?.[0] || '?'}
-                  </div>
+                  <AvatarImage avatarId={player?.avatar ?? 0} size="sm" />
                   <span className={`text-sm ${isMe ? 'text-white font-semibold' : 'text-slate-300'}`}>
                     {player?.name}
                     {isMe && <span className="text-gold text-xs ml-1">(我)</span>}

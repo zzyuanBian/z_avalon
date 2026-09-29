@@ -158,12 +158,13 @@ function handleMessage(ws: WebSocket, msg: WsMessage): void {
 function handleRoomCreate(ws: WebSocket, data: any): void {
   const name = (data?.playerName || '').trim();
   const roomName = (data?.roomName || '').trim();
+  const avatar = typeof data?.avatar === 'number' ? data.avatar : undefined;
   if (!name || name.length > 20) {
     send(ws, 'room:error', { message: '昵称需要1-20个字符' });
     return;
   }
 
-  const { room, playerId } = createRoom(name, roomName);
+  const { room, playerId } = createRoom(name, roomName, avatar);
   wsMap.set(ws, { roomId: room.id, playerId });
   joinWsRoom(ws, room.id);
 
@@ -185,13 +186,14 @@ function handleRoomCreate(ws: WebSocket, data: any): void {
 function handleRoomJoin(ws: WebSocket, data: any): void {
   const name = (data?.playerName || '').trim();
   const roomId = (data?.roomId || '').toUpperCase().trim();
+  const avatar = typeof data?.avatar === 'number' ? data.avatar : undefined;
 
   if (!name || name.length > 20) {
     send(ws, 'room:error', { message: '昵称需要1-20个字符' });
     return;
   }
 
-  const result = joinRoom(roomId, name);
+  const result = joinRoom(roomId, name, avatar);
   if ('error' in result) {
     send(ws, 'room:error', { message: result.error });
     return;

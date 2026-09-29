@@ -13,7 +13,7 @@ export interface Room {
 
 const rooms = new Map<string, Room>();
 
-export function createRoom(playerName: string, roomName?: string): { room: Room; playerId: string } {
+export function createRoom(playerName: string, roomName?: string, avatar?: number): { room: Room; playerId: string } {
   const roomId = generateRoomCode(rooms);
   const playerId = uuid();
 
@@ -22,6 +22,7 @@ export function createRoom(playerName: string, roomName?: string): { room: Room;
     name: playerName,
     seatIndex: 0,
     connected: true,
+    avatar: avatar ?? Math.floor(Math.random() * 16),
   };
 
   const room: Room = {
@@ -37,7 +38,7 @@ export function createRoom(playerName: string, roomName?: string): { room: Room;
   return { room, playerId };
 }
 
-export function joinRoom(roomId: string, playerName: string): { room: Room; playerId: string } | { error: string } {
+export function joinRoom(roomId: string, playerName: string, avatar?: number): { room: Room; playerId: string } | { error: string } {
   const room = rooms.get(roomId);
   if (!room) return { error: '房间不存在' };
   if (room.players.length >= 10) return { error: '房间已满（最多10人）' };
@@ -61,6 +62,7 @@ export function joinRoom(roomId: string, playerName: string): { room: Room; play
     name: playerName,
     seatIndex: room.players.length,
     connected: true,
+    avatar: avatar ?? Math.floor(Math.random() * 16),
   };
 
   room.players.push(player);

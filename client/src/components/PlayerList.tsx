@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Player, KnownPlayers } from '@shared/types';
 import { useGameStore } from '../stores/gameStore';
 import PlayerMarking from './PlayerMarking';
+import { AvatarImage } from './Avatars';
 
 const MARK_LABELS: Record<string, string> = {
   merlin: '梅林',
@@ -62,13 +63,12 @@ export default function PlayerList({ players, leaderIndex, proposedTeam, knownPl
                   !isMe && isGameActive ? 'cursor-pointer hover:ring-1 hover:ring-slate-500' : ''
                 }`}
               >
-                {/* Seat number */}
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                  isLeader ? 'bg-gold/20 text-gold crown-pulse' :
-                  isOnTeam ? 'bg-good/20 text-good-light' :
-                  'bg-slate-700 text-slate-400'
-                }`}>
-                  {isLeader ? '♕' : player.seatIndex + 1}
+                {/* Seat avatar */}
+                <div className="relative flex-shrink-0">
+                  <AvatarImage avatarId={player.avatar ?? 0} size="sm" />
+                  {isLeader && (
+                    <span className="absolute -top-0.5 -left-0.5 text-[10px]">♕</span>
+                  )}
                 </div>
 
                 {/* Name + known info + marks */}

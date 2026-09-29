@@ -47,6 +47,7 @@ export interface Player {
   name: string;
   seatIndex: number;
   connected: boolean;
+  avatar: number;
 }
 
 export interface RoleAssignment {
@@ -150,8 +151,8 @@ export interface PlayerView {
 }
 
 export interface ClientToServerEvents {
-  'room:create': (data: { playerName: string }) => void;
-  'room:join': (data: { roomId: string; playerName: string }) => void;
+  'room:create': (data: { playerName: string; avatar: number }) => void;
+  'room:join': (data: { roomId: string; playerName: string; avatar: number }) => void;
   'room:leave': () => void;
   'room:reconnect': (data: { roomId: string; playerId: string }) => void;
   'game:start': () => void;

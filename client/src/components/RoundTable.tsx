@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { Player, KnownPlayers } from '@shared/types';
 import { useGameStore } from '../stores/gameStore';
 import PlayerMarking from './PlayerMarking';
+import { AvatarImage } from './Avatars';
 
 const MARK_LABELS: Record<string, string> = {
   merlin: '梅林', percival: '派西维尔', loyal_servant: '忠臣',
@@ -84,12 +85,12 @@ export default function RoundTable({ players, leaderIndex, proposedTeam, knownPl
                 {proposedTeam.map(id => {
                   const p = players.find(pl => pl.id === id);
                   return (
-                    <div
+                    <AvatarImage
                       key={id}
-                      className="w-5 h-5 rounded-full bg-good/30 text-good-light text-[9px] flex items-center justify-center font-bold border border-good/50"
-                    >
-                      {p?.name?.[0] || '?'}
-                    </div>
+                      avatarId={p?.avatar ?? 0}
+                      size="sm"
+                      ring="ring-1 ring-good/50"
+                    />
                   );
                 })}
               </div>
@@ -134,16 +135,23 @@ export default function RoundTable({ players, leaderIndex, proposedTeam, knownPl
                     setMarkingTarget({ id: player.id, name: player.name });
                   }
                 }}
-                className={`relative w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
+                className={`relative transition-all ${
                   disconnected ? 'opacity-40' : 'cursor-pointer'
-                } ${
-                  isLeader ? 'bg-gold/20 text-gold ring-2 ring-gold/60' :
-                  isOnTeam ? 'bg-good/20 text-good-light ring-2 ring-good/50' :
-                  isMe ? 'bg-slate-700 text-white ring-2 ring-slate-500' :
-                  'bg-slate-700/80 text-slate-300 hover:ring-1 hover:ring-slate-500'
                 }`}
               >
-                {isLeader ? '♕' : player.name?.[0] || '?'}
+                <AvatarImage
+                  avatarId={player.avatar ?? 0}
+                  size="md"
+                  ring={
+                    isLeader ? 'ring-2 ring-gold/60' :
+                    isOnTeam ? 'ring-2 ring-good/50' :
+                    isMe ? 'ring-2 ring-slate-500' :
+                    ''
+                  }
+                />
+                {isLeader && (
+                  <span className="absolute -top-1 -left-1 text-sm">♕</span>
+                )}
 
                 {/* Known info dot */}
                 {knownDotColor && (

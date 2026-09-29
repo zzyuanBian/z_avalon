@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useGameStore } from '../stores/gameStore';
 import { getSocket } from '../socket';
+import { AvatarImage } from './Avatars';
 import type { ChatMessage } from '@shared/types';
 
 export default function ChatPanel() {
@@ -107,15 +108,19 @@ export default function ChatPanel() {
               )}
               {messages.map(msg => {
                 const isMe = msg.playerId === playerId;
+                const sender = view.players.find(p => p.id === msg.playerId);
                 return (
-                  <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
-                    <span className="text-slate-500 text-[10px] mb-0.5 px-1">{msg.playerName}</span>
-                    <div className={`max-w-[80%] px-3 py-1.5 rounded-xl text-sm break-words ${
-                      isMe
-                        ? 'bg-gold/20 text-gold-light rounded-br-sm'
-                        : 'bg-slate-700 text-slate-200 rounded-bl-sm'
-                    }`}>
-                      {msg.message}
+                  <div key={msg.id} className={`flex items-start gap-1.5 ${isMe ? 'flex-row-reverse' : ''}`}>
+                    <AvatarImage avatarId={sender?.avatar ?? 0} size="sm" />
+                    <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                      <span className="text-slate-500 text-[10px] mb-0.5 px-1">{msg.playerName}</span>
+                      <div className={`max-w-[80%] px-3 py-1.5 rounded-xl text-sm break-words ${
+                        isMe
+                          ? 'bg-gold/20 text-gold-light rounded-br-sm'
+                          : 'bg-slate-700 text-slate-200 rounded-bl-sm'
+                      }`}>
+                        {msg.message}
+                      </div>
                     </div>
                   </div>
                 );
