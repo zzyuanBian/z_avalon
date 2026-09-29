@@ -107,8 +107,8 @@ export default function HomeScreen({ onHistory }: Props) {
                 <button
                   key={av.id}
                   onClick={() => setSelectedAvatar(av.id)}
-                  className={`flex flex-col items-center transition-all ${
-                    selectedAvatar === av.id ? 'scale-110' : 'opacity-70 hover:opacity-100'
+                  className={`transition-all ${
+                    selectedAvatar === av.id ? '' : 'opacity-70 hover:opacity-100'
                   }`}
                   title={av.name}
                 >
@@ -117,9 +117,6 @@ export default function HomeScreen({ onHistory }: Props) {
                     size="sm"
                     ring={selectedAvatar === av.id ? 'ring-2 ring-gold' : ''}
                   />
-                  <span className={`text-[8px] mt-0.5 truncate w-full text-center ${
-                    selectedAvatar === av.id ? 'text-gold' : 'text-slate-500'
-                  }`}>{av.name}</span>
                 </button>
               ))}
             </div>
@@ -158,8 +155,8 @@ export default function HomeScreen({ onHistory }: Props) {
                 <button
                   key={av.id}
                   onClick={() => setSelectedAvatar(av.id)}
-                  className={`flex flex-col items-center transition-all ${
-                    selectedAvatar === av.id ? 'scale-110' : 'opacity-70 hover:opacity-100'
+                  className={`transition-all ${
+                    selectedAvatar === av.id ? '' : 'opacity-70 hover:opacity-100'
                   }`}
                   title={av.name}
                 >
@@ -168,9 +165,6 @@ export default function HomeScreen({ onHistory }: Props) {
                     size="sm"
                     ring={selectedAvatar === av.id ? 'ring-2 ring-gold' : ''}
                   />
-                  <span className={`text-[8px] mt-0.5 truncate w-full text-center ${
-                    selectedAvatar === av.id ? 'text-gold' : 'text-slate-500'
-                  }`}>{av.name}</span>
                 </button>
               ))}
             </div>
