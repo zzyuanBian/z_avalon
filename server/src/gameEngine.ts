@@ -258,8 +258,9 @@ export class GameEngine {
     if (!this.state.proposedTeam.includes(playerId)) {
       throw new Error('你不在任务队伍中');
     }
+    // Idempotent: silently ignore duplicate submissions from the same player
     if (this.state.questDecisions[playerId] !== undefined) {
-      throw new Error('你已经做过决定');
+      return;
     }
 
     // Server-side enforcement: good players MUST play success

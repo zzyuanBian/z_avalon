@@ -8,6 +8,8 @@ import { saveGameStart, saveGameEnd } from './database.js';
 const engines = new Map<string, GameEngine>();
 const voteTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const questTimers = new Map<string, ReturnType<typeof setTimeout>>();
+// Track which players have submitted quest decisions (prevents duplicate messages)
+const questSubmitted = new Map<string, Set<string>>(); // roomId → Set<playerId>
 
 // Map WebSocket -> { roomId, playerId }
 const wsMap = new Map<WebSocket, { roomId: string; playerId: string }>();
@@ -366,6 +368,18 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
   const engine = engines.get(info.roomId);
   if (!engine) return;
 
+  // Deduplicate: ignore if this player already submitted for this quest
+  let submitted = questSubmitted.get(info.roomId);
+  if (!submitted) {
+    submitted = new Set();
+    questSubmitted.set(info.roomId, submitted);
+  }
+  if (submitted.has(info.playerId)) {
+    console.log(`[quest-decide] duplicate from ${info.playerId.slice(0,8)}, ignoring`);
+    return;
+  }
+  submitted.add(info.playerId);
+
   try {
     engine.submitQuestDecision(info.playerId, data.success);
     emitGameStates(info.roomId);
@@ -373,6 +387,7 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
     // If all decisions in, start quest result display timer
     if (engine.state.phase === 'quest_result') {
       console.log(`[quest] all decisions in, starting 5s result timer for ${info.roomId}`);
+      questSubmitted.delete(info.roomId); // Clean up
       questTimers.set(info.roomId, setTimeout(() => {
         engine.advanceAfterQuestResult();
         emitGameStates(info.roomId);
@@ -381,6 +396,7 @@ function handleQuestDecide(ws: WebSocket, data: any): void {
     }
   } catch (e) {
     console.error(`[quest-decide] error:`, (e as Error).message);
+    submitted.delete(info.playerId); // Allow retry on error
     send(ws, 'game:error', { message: (e as Error).message });
   }
 }
@@ -421,6 +437,7 @@ function handlePlayAgain(ws: WebSocket): void {
     clearTimeout(questTimers.get(info.roomId)!);
     questTimers.delete(info.roomId);
   }
+  questSubmitted.delete(info.roomId);
 
   const engine = engines.get(info.roomId);
   if (engine) {
