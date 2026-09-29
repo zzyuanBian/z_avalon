@@ -101,7 +101,7 @@ export default function LobbyScreen() {
 
       {/* Player list */}
       <div className="w-full max-w-sm mb-6">
-        <PlayerList players={view.players} leaderIndex={-1} proposedTeam={[]} />
+        <PlayerList players={view.players} leaderIndex={-1} proposedTeam={[]} knownPlayers={{}} totalPlayers={view.players.length} />
       </div>
 
       {/* Error */}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { Player } from '@shared/types';
+import type { Player, KnownPlayers } from '@shared/types';
 import { useGameStore } from '../stores/gameStore';
 import PlayerMarking from './PlayerMarking';
 
@@ -15,17 +15,26 @@ const MARK_LABELS: Record<string, string> = {
   evil: '坏人',
 };
 
+// Known info badge styles (server-provided, non-editable)
+const KNOWN_INFO_STYLES: Record<string, string> = {
+  '邪恶': 'bg-red-500/25 text-red-300 border border-red-500/40',
+  '梅林?': 'bg-purple-500/25 text-purple-300 border border-purple-500/40',
+  '邪恶队友': 'bg-red-500/25 text-red-300 border border-red-500/40',
+};
+
 interface PlayerListProps {
   players: Player[];
   leaderIndex: number;
   proposedTeam: string[];
+  knownPlayers: KnownPlayers;
+  totalPlayers: number;
 }
 
-export default function PlayerList({ players, leaderIndex, proposedTeam }: PlayerListProps) {
+export default function PlayerList({ players, leaderIndex, proposedTeam, knownPlayers, totalPlayers }: PlayerListProps) {
   const { playerId, playerMarks, view } = useGameStore();
   const [markingTarget, setMarkingTarget] = useState<{ id: string; name: string } | null>(null);
   const sorted = [...players].sort((a, b) => a.seatIndex - b.seatIndex);
-  const isGameActive = view?.phase !== 'game_over';
+  const isGameActive = view?.phase !== 'game_over' && view?.phase !== 'lobby';
 
   return (
     <div className="max-w-lg mx-auto">
@@ -36,6 +45,7 @@ export default function PlayerList({ players, leaderIndex, proposedTeam }: Playe
           const disconnected = !player.connected;
           const marks = playerMarks[player.id] || [];
           const isMe = player.id === playerId;
+          const knownLabel = knownPlayers[player.id]; // Server-provided info
 
           return (
             <div key={player.id}>
@@ -60,15 +70,26 @@ export default function PlayerList({ players, leaderIndex, proposedTeam }: Playe
                   {isLeader ? '♕' : player.seatIndex + 1}
                 </div>
 
-                {/* Name + marks */}
+                {/* Name + known info + marks */}
                 <div className="flex-1 min-w-0">
-                  <span className={`text-sm truncate block ${
-                    isLeader ? 'text-gold font-semibold' :
-                    isOnTeam ? 'text-good-light' :
-                    'text-slate-300'
-                  }`}>
-                    {player.name}{isMe ? ' (我)' : ''}
-                  </span>
+                  <div className="flex items-center gap-1">
+                    <span className={`text-sm truncate ${
+                      isLeader ? 'text-gold font-semibold' :
+                      isOnTeam ? 'text-good-light' :
+                      'text-slate-300'
+                    }`}>
+                      {player.name}{isMe ? ' (我)' : ''}
+                    </span>
+                    {/* Server-provided known info badge (non-editable) */}
+                    {knownLabel && (
+                      <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium flex-shrink-0 ${
+                        KNOWN_INFO_STYLES[knownLabel] || 'bg-slate-700 text-slate-300'
+                      }`}>
+                        {knownLabel}
+                      </span>
+                    )}
+                  </div>
+                  {/* Manual marks */}
                   {marks.length > 0 && (
                     <div className="flex flex-wrap gap-0.5 mt-0.5">
                       {marks.map(mark => {
@@ -103,6 +124,7 @@ export default function PlayerList({ players, leaderIndex, proposedTeam }: Playe
         <PlayerMarking
           playerId={markingTarget.id}
           playerName={markingTarget.name}
+          totalPlayers={totalPlayers}
           onClose={() => setMarkingTarget(null)}
         />
       )}

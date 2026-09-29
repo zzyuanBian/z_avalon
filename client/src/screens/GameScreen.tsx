@@ -67,6 +67,8 @@ export default function GameScreen() {
           players={view.players}
           leaderIndex={view.leaderIndex}
           proposedTeam={view.proposedTeam}
+          knownPlayers={view.knownPlayers}
+          totalPlayers={view.totalPlayers}
         />
       </div>
 
@@ -81,7 +83,7 @@ export default function GameScreen() {
       <InfoPanel />
 
       {/* Game log */}
-      <GameLog log={view.log} />
+      <GameLog log={view.log} playerNames={view.players.map(p => p.name)} />
     </div>
   );
 }
