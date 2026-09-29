@@ -56,13 +56,19 @@ export function joinRoom(roomId: string, playerName: string, avatar?: number): {
   const duplicate = room.players.find(p => p.name === playerName);
   if (duplicate) return { error: '该昵称已被使用' };
 
+  // Check if avatar is already taken
+  const targetAvatar = avatar ?? Math.floor(Math.random() * 16);
+  if (room.players.some(p => p.avatar === targetAvatar && p.connected)) {
+    return { error: '该头像已被其他玩家使用，请选择其他头像' };
+  }
+
   const playerId = uuid();
   const player: Player = {
     id: playerId,
     name: playerName,
     seatIndex: room.players.length,
     connected: true,
-    avatar: avatar ?? Math.floor(Math.random() * 16),
+    avatar: targetAvatar,
   };
 
   room.players.push(player);
